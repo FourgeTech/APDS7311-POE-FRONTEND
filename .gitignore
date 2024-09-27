@@ -1,0 +1,62 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing logs
+/coverage
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv environment variables file
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Log files
+/logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Parcel cache (if used in the future)
+.cache
+
+# Output of 'npm build'
+/build
+/dist
+
+# Tailwind CSS specific
+public/tailwind.css
+
+# Lockfiles
+package-lock.json
+yarn.lock
+
+# Jest and Testing files
+/coverage
+/junit.xml
+/lcov-report/
+.vscode
+
+# Webpack files (if applicable)
+/webpack-stats.json
+
+# Optional: Ignore local IDE settings
+.idea
+.vscode/*
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/jsconfig.json
+.vscode/extensions.json
