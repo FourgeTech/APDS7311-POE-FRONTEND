@@ -1,0 +1,54 @@
+version: 2.1
+orbs:
+  node: circleci/node@5
+
+jobs:
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    environment:
+      JEST_JUNIT_OUTPUT_DIR: ./test-results/
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+      - run:
+          command: yarn add jest-junit --ignore-workspace-root-check
+      - run:
+          name: Run tests
+          command: yarn run test --ci --runInBand --reporters=default --reporters=jest-junit
+      - store_test_results:
+          path: ./test-results/
+
+  sonar-analysis:
+    # Run SonarQube analysis
+    docker:
+      - image: circleci/node:16  # Replace with your Node.js version
+    environment:
+      SONAR_HOST_URL: "https://sonarqube.naidoohome.site"
+      SONAR_TOKEN: "<YOUR_SONAR_TOKEN>"  # Set this in CircleCI environment variables
+      SONAR_PROJECT_KEY: "your_project_key"
+      SONAR_SOURCES: "./src"
+      SONAR_BRANCH_NAME: "${CIRCLE_BRANCH}"  # Dynamically use current branch
+    steps:
+      - checkout
+      - run:
+          name: Install sonar-scanner
+          command: |
+            npm install -g sonar-scanner
+      - run:
+          name: Run SonarQube analysis
+          command: |
+            sonar-scanner \
+              -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+              -Dsonar.sources=./src \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONAR_TOKEN
+
+workflows:
+  test-and-sonar:
+    jobs:
+      - test-node
+      - sonar-analysis:
+          requires:
+            - test-node
