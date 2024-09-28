@@ -44,16 +44,15 @@ jobs:
     docker:
       - image: circleci/node:16  # Replace with your Node.js version
     environment:
-      SONAR_HOST_URL: "https://sonarqube.naidoohome.site"
-      SONAR_TOKEN: "<YOUR_SONAR_TOKEN>"  # Set this in CircleCI environment variables
-      SONAR_PROJECT_KEY: "your_project_key"
+      SONAR_HOST_URL: "${SONAR_HOST_URL}" # Set this in CircleCI environment variables
+      SONAR_TOKEN: "${SONAR_TOKEN}"  # Set this in CircleCI environment variables
+      SONAR_PROJECT_KEY: "${SONAR_PROJECT_KEY}" # Set this in CircleCI environment variables
       SONAR_SOURCES: "./src"
-      SONAR_BRANCH_NAME: "${CIRCLE_BRANCH}"  # Dynamically use current branch
     steps:
       - checkout
       - run:
           name: Install sonar-scanner
-          command: npm install -g sonar-scanner
+          command: npm install sonar-scanner --save-dev
       - run:
           name: Run SonarQube analysis
           command: |
