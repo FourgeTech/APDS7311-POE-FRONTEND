@@ -49,7 +49,7 @@ jobs:
           # Set the SonarQube project key, host URL and token as environment variables in CircleCI
           name: Run SonarQube analysis
           command: |
-            ./node_modules/.bin/sonar-scanner \
+            sonar-scanner \
               -Dsonar.projectKey=$SONAR_PROJECT_KEY \ 
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
