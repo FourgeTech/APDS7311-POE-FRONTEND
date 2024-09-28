@@ -66,16 +66,13 @@ jobs:
 workflows:
   build-test-and-sonar:
     jobs:
-      - test-node
+      - test-node:
       - build-node:
           requires:
             - test-node
           filters:
             branches:
               only: main
-            pull_requests:
-              only:
-                - main
       - sonar-analysis:
           requires:
             - test-node
