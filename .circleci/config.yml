@@ -52,11 +52,11 @@ jobs:
       - checkout
       - run:
           name: Install sonar-scanner
-          command: npm install -g sonar-scanner
+          command: npm install sonar-scanner --save-dev
       - run:
           name: Run SonarQube analysis
           command: |
-            sonar-scanner \
+            ./node_modules/.bin/sonar-scanner \
               -Dsonar.projectKey=$SONAR_PROJECT_KEY \
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
