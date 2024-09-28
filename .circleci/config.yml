@@ -39,35 +39,43 @@ jobs:
           path: ~/artifacts
           destination: node-build
 
-  deploy:
-    # This is an example deploy job, not actually used by the workflow
+  sonar-analysis:
+    # Run SonarQube analysis
     docker:
-      - image: cimg/base:stable
+      - image: circleci/node:16  # Replace with your Node.js version
+    environment:
+      SONAR_HOST_URL: "https://sonarqube.naidoohome.site"
+      SONAR_TOKEN: "<YOUR_SONAR_TOKEN>"  # Set this in CircleCI environment variables
+      SONAR_PROJECT_KEY: "your_project_key"
+      SONAR_SOURCES: "./src"
+      SONAR_BRANCH_NAME: "${CIRCLE_BRANCH}"  # Dynamically use current branch
     steps:
-      # Replace this with steps to deploy to users
+      - checkout
       - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
+          name: Install sonar-scanner
+          command: npm install -g sonar-scanner
+      - run:
+          name: Run SonarQube analysis
+          command: |
+            sonar-scanner \
+              -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+              -Dsonar.sources=./src \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONAR_TOKEN
 
 workflows:
-  build-and-test:
+  build-test-and-sonar:
     jobs:
-      - test-node:
-          filters:
-            branches:
-              only: main  # This ensures the test-node job runs only on main branch
-            pull_requests:
-              only:
-                - main  # Ensures job runs only for PRs to main branch
+      - test-node
       - build-node:
           requires:
             - test-node
           filters:
             branches:
-              only: main  # This ensures the build-node job runs only on main branch
+              only: main
             pull_requests:
               only:
-                - main  # Ensures job runs only for PRs to main branch
-    # - deploy:
-    #     requires:
-    #       - build-node
+                - main
+      - sonar-analysis:
+          requires:
+            - test-node
