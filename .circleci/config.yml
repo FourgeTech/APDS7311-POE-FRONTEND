@@ -50,7 +50,7 @@ jobs:
           name: Run SonarQube analysis
           command: |
             sonar-scanner \
-              -Dsonar.projectKey=$SONAR_PROJECT_KEY \ 
+              -Dsonar.projectKey=$SONAR_PROJECT_KEY \
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
               -Dsonar.login=$SONAR_TOKEN
