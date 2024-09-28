@@ -44,7 +44,7 @@ jobs:
     docker:
       - image: sonarsource/sonar-scanner-cli:latest  # Replace with your Node.js version
     environment:
-      SONAR_HOST_URL: "${SONAR_HOST_URL}" # Set this in CircleCI environment variables
+      SONAR_HOST_URL: "https://sonarqube.naidoohome.site/" # Set this in CircleCI environment variables
       SONAR_TOKEN: "${SONAR_TOKEN}"  # Set this in CircleCI environment variables
       SONAR_PROJECT_KEY: "${SONAR_PROJECT_KEY}" # Set this in CircleCI environment variables
       SONAR_SOURCES: "./src"
