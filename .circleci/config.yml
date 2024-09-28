@@ -46,9 +46,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install sonar-scanner
-          command: npm install sonar-scanner --save-dev
-      - run:
           # Set the SonarQube project key, host URL and token as environment variables in CircleCI
           name: Run SonarQube analysis
           command: |
