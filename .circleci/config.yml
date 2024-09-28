@@ -42,22 +42,18 @@ jobs:
   sonar-analysis:
     # Run SonarQube analysis
     docker:
-      - image: sonarsource/sonar-scanner-cli:latest  # Replace with your Node.js version
-    environment:
-      SONAR_HOST_URL: "https://sonarqube.naidoohome.site/" # Set this in CircleCI environment variables
-      SONAR_TOKEN: "${SONAR_TOKEN}"  # Set this in CircleCI environment variables
-      SONAR_PROJECT_KEY: "${SONAR_PROJECT_KEY}" # Set this in CircleCI environment variables
-      SONAR_SOURCES: "./src"
+      - image: sonarsource/sonar-scanner-cli:latest  
     steps:
       - checkout
       - run:
           name: Install sonar-scanner
           command: npm install sonar-scanner --save-dev
       - run:
+          # Set the SonarQube project key, host URL and token as environment variables in CircleCI
           name: Run SonarQube analysis
           command: |
             ./node_modules/.bin/sonar-scanner \
-              -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+              -Dsonar.projectKey=$SONAR_PROJECT_KEY \ 
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
               -Dsonar.login=$SONAR_TOKEN
