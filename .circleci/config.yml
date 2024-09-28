@@ -42,7 +42,7 @@ jobs:
   sonar-analysis:
     # Run SonarQube analysis
     docker:
-      - image: circleci/node:16  # Replace with your Node.js version
+      - image: sonarsource/sonar-scanner-cli:latest  # Replace with your Node.js version
     environment:
       SONAR_HOST_URL: "${SONAR_HOST_URL}" # Set this in CircleCI environment variables
       SONAR_TOKEN: "${SONAR_TOKEN}"  # Set this in CircleCI environment variables
