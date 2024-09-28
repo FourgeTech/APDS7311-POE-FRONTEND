@@ -52,7 +52,7 @@ jobs:
       - checkout
       - run:
           name: Install sonar-scanner
-          command: npm install sonar-scanner --save-dev
+          command: npm install -g sonar-scanner
       - run:
           name: Run SonarQube analysis
           command: |
