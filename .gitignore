@@ -60,3 +60,4 @@ yarn.lock
 .vscode/launch.json
 .vscode/jsconfig.json
 .vscode/extensions.json
+node_modules/.vite/
