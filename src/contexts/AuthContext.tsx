@@ -52,8 +52,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Function to handle login
     const login = async (username: string, accountNumber: string, password: string) => {
-        try {
         setLoading(true);
+        try {
         // Call your API login function
         // Fetch user data after successful login
         // Set the authenticated user
@@ -79,7 +79,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return (
         <AuthContext.Provider value={value}>
-          {!loading && children} {/* Render children when loading is false */}
+          {children} {/* Render children when loading is false */}
         </AuthContext.Provider>
     );
 };
+
+export { AuthContext };
