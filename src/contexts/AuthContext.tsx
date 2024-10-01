@@ -12,8 +12,9 @@ interface User {
 interface RegisterValues {
     firstName: string;
     lastName: string;
+    email: string;
     username: string;
-    idNumber: string;
+    IdNumber: string;
     accountNumber: string;
     password: string;
 }
@@ -74,15 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
             if (response.ok) {
                 const responseData = await response.json();
-                const newUser: User = {
-                    customerID: responseData.customerID,
-                    firstName: responseData.user.firstName,
-                    lastName: responseData.user.lastName,
-                    username: responseData.user.username,
-                    email: responseData.user.email,
-                };
-                setUser(newUser); // Set the newly registered user
-                console.log("Registration successful:", newUser);
+                console.log("Registration successful:");
             } else {
                 console.log(await response.json());
             }

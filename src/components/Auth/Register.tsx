@@ -21,12 +21,12 @@ export default function Register() {
       .required("Username is required")
       .min(6, "Username must be at least 6 characters")
       .max(15, "Username must not exceed 15 characters")
-      .test(
-        "is-alphanumeric",
-        "Username can only contain letters and numbers",
-        (value) => !value || /^[a-zA-Z0-9]*$/.test(value)
-      ),
-    idNumber: Yup.string()
+      .matches(/^[a-zA-Z0-9]*$/, "Username can only contain letters and numbers"),
+      
+    email: Yup.string()
+    .required("Email is required"),
+
+    IDNumber: Yup.string()
       .required("ID Number is required")
       .min(13, "ID Number must be 13 digits long")
       .max(13, "ID Number must be 13 digits long")
@@ -35,8 +35,8 @@ export default function Register() {
       ),
     accountNumber: Yup.string()
       .required("Account Number is required")
-      .min(13, "Account Number must be 11 digits long")
-      .max(13, "Account Number must be 11 digits long")
+      .min(11, "Account Number must be 11 digits long")
+      .max(11, "Account Number must be 11 digits long")
       .test("is-numeric", "Account Number must be numeric", (value) =>
         /^\d*$/.test(value)
       ),
@@ -54,8 +54,9 @@ export default function Register() {
     initialValues: {
       firstName: "",
       lastName: "",
+      email: "",
       username: "",
-      idNumber: "",
+      IDNumber: "",
       accountNumber: "",
       password: "",
     },
@@ -77,11 +78,11 @@ export default function Register() {
     <div className="flex min-h-screen">
       <div className="flex-1 bg-black p-8 flex flex-col justify-between">
         <div>
-          <PiggyBank className="h-16 w-16 text-white" />
-          <h1 className="text-6xl font-bold text-blue-600 mt-4">Fourge Tech</h1>
+          <PiggyBank className="h-12 w-12 text-white" />
+          <h1 className="text-5xl font-bold text-blue-600 mt-4">Fourge Tech</h1>
         </div>
         <div className="text-white">
-          <p className="text-lg font-semibold mb-2">
+          <p className="text-base font-semibold mb-2">
             "Connecting you to the world with secure, seamless international
             payments."
           </p>
@@ -89,21 +90,21 @@ export default function Register() {
         </div>
       </div>
 
-      <div className="flex-1 p-8 flex items-center justify-center">
-        <div className="w-full max-w-md space-y-6">
-          <div className="space-y-2 text-center">
+      <div className="flex-1 p-6 flex items-center justify-center">
+        <div className="w-full max-w-md space-y-4">
+          <div className="space-y-1 text-center">
             <div className="flex justify-center">
-              <UserPlus className="h-16 w-16 text-blue-600" />
+              <UserPlus className="h-14 w-14 text-blue-600" />
             </div>
-            <h2 className="text-3xl font-bold">Create an account</h2>
-            <p className="text-gray-500 dark:text-gray-400">
+            <h2 className="text-2xl font-bold">Create an account</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
               Enter your details below to create your account
             </p>
           </div>
-          <form className="space-y-4" onSubmit={formik.handleSubmit}>
+          <form className="space-y-3" onSubmit={formik.handleSubmit}>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="first-name">First name</Label>
+              <div className="space-y-1">
+                <Label htmlFor="first-name" className="text-sm">First name</Label>
                 <Input
                   id="first-name"
                   placeholder="John"
@@ -115,13 +116,13 @@ export default function Register() {
                   }`}
                 />
                 {formik.touched.firstName && formik.errors.firstName ? (
-                  <div className="text-red-500 text-sm mt-1">
+                  <div className="text-red-500 text-xs mt-1">
                     {formik.errors.firstName}
                   </div>
                 ) : null}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="last-name">Last name</Label>
+              <div className="space-y-1">
+                <Label htmlFor="last-name" className="text-sm">Last name</Label>
                 <Input
                   id="last-name"
                   placeholder="Doe"
@@ -133,14 +134,32 @@ export default function Register() {
                   }`}
                 />
                 {formik.touched.lastName && formik.errors.lastName ? (
-                  <div className="text-red-500 text-sm mt-1">
+                  <div className="text-red-500 text-xs mt-1">
                     {formik.errors.lastName}
                   </div>
                 ) : null}
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+            <div className="space-y-1">
+              <Label htmlFor="email" className="text-sm">Email</Label>
+              <Input
+                id="email"
+                placeholder="fourgetech@gmail.com"
+                {...formik.getFieldProps("email")}
+                className={`w-full ${
+                  formik.touched.email && formik.errors.email
+                    ? "border-red-500"
+                    : ""
+                }`}
+              />
+              {formik.touched.email && formik.errors.email ? (
+                <div className="text-red-500 text-xs mt-1">
+                  {formik.errors.email}
+                </div>
+              ) : null}
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="username" className="text-sm">Username</Label>
               <Input
                 id="username"
                 placeholder="johndoe"
@@ -152,31 +171,31 @@ export default function Register() {
                 }`}
               />
               {formik.touched.username && formik.errors.username ? (
-                <div className="text-red-500 text-sm mt-1">
+                <div className="text-red-500 text-xs mt-1">
                   {formik.errors.username}
                 </div>
               ) : null}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="id-number">ID Number</Label>
+            <div className="space-y-1">
+              <Label htmlFor="IDNumber" className="text-sm">ID Number</Label>
               <Input
-                id="id-number"
+                id="IDNumber"
                 placeholder="0303177043187"
-                {...formik.getFieldProps("idNumber")}
+                {...formik.getFieldProps("IDNumber")}
                 className={`${
-                  formik.touched.idNumber && formik.errors.idNumber
+                  formik.touched.IDNumber && formik.errors.IDNumber
                     ? "border-red-500"
                     : ""
                 }`}
               />
-              {formik.touched.idNumber && formik.errors.idNumber ? (
-                <div className="text-red-500 text-sm mt-1">
-                  {formik.errors.idNumber}
+              {formik.touched.IDNumber && formik.errors.IDNumber ? (
+                <div className="text-red-500 text-xs mt-1">
+                  {formik.errors.IDNumber}
                 </div>
               ) : null}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="account-number">Account Number</Label>
+            <div className="space-y-1">
+              <Label htmlFor="account-number" className="text-sm">Account Number</Label>
               <Input
                 id="account-number"
                 placeholder="12345678987"
@@ -188,13 +207,13 @@ export default function Register() {
                 }`}
               />
               {formik.touched.accountNumber && formik.errors.accountNumber ? (
-                <div className="text-red-500 text-sm mt-1">
+                <div className="text-red-500 text-xs mt-1">
                   {formik.errors.accountNumber}
                 </div>
               ) : null}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-1">
+              <Label htmlFor="password" className="text-sm">Password</Label>
               <Input
                 id="password"
                 placeholder="************"
@@ -207,7 +226,7 @@ export default function Register() {
                 }`}
               />
               {formik.touched.password && formik.errors.password ? (
-                <div className="text-red-500 text-sm mt-1">
+                <div className="text-red-500 text-xs mt-1">
                   {formik.errors.password}
                 </div>
               ) : null}
@@ -220,7 +239,7 @@ export default function Register() {
               {loading ? "Registering..." : "Create Account"}
             </Button>
           </form>
-          <div className="text-center text-sm">
+          <div className="text-center text-xs">
             By clicking continue, you agree to our{" "}
             <a className="underline" href="#">
               Terms of Service
