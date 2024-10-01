@@ -9,10 +9,21 @@ interface User {
     email: String;
 }
 
+interface RegisterValues {
+    firstName: string;
+    lastName: string;
+    username: string;
+    idNumber: string;
+    accountNumber: string;
+    password: string;
+}
+
+
 //Define the AuthContextType interface
 interface AuthContextType {
     user: User | null;
     login: (username: string, accountNumber: string, password: string) => Promise<void>;
+    register: (values: RegisterValues) => Promise<void>;
     logout: () => Promise<void>;
     loading: boolean;
 }
@@ -49,6 +60,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         };
         checkUserSession();
     }, []);
+
+    const register = async (values: RegisterValues) => {
+        setLoading(true);
+        try {
+            const response = await fetch('https://localhost:5000/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(values),
+            });
+    
+            if (response.ok) {
+                const responseData = await response.json();
+                const newUser: User = {
+                    customerID: responseData.customerID,
+                    firstName: responseData.user.firstName,
+                    lastName: responseData.user.lastName,
+                    username: responseData.user.username,
+                    email: responseData.user.email,
+                };
+                setUser(newUser); // Set the newly registered user
+                console.log("Registration successful:", newUser);
+            } else {
+                console.log(await response.json());
+            }
+        } catch (error) {
+            console.error('Registration failed:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Function to handle login
     const login = async (username: string, accountNumber: string, password: string) => {
@@ -101,7 +145,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const value = { user, login, logout, loading };
+    const value = { user, login, register,logout, loading };
 
     return (
         <AuthContext.Provider value={value}>

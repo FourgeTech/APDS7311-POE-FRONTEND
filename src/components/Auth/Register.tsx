@@ -4,18 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PiggyBank, UserPlus } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext"; // Import useAuth to access register function
 
 export default function Register() {
+  const { register, loading } = useAuth(); // Access register function and loading state from AuthContext
+
   // Define validation schema using Yup
   const validationSchema = Yup.object({
     firstName: Yup.string()
       .required("First name is required")
       .matches(/^[a-zA-Z]+$/, "First name can only contain letters"),
-
     lastName: Yup.string()
       .required("Last name is required")
       .matches(/^[a-zA-Z]+$/, "Last name can only contain letters"),
-
     username: Yup.string()
       .required("Username is required")
       .min(6, "Username must be at least 6 characters")
@@ -25,27 +26,20 @@ export default function Register() {
         "Username can only contain letters and numbers",
         (value) => !value || /^[a-zA-Z0-9]*$/.test(value)
       ),
-
     idNumber: Yup.string()
-      .test(
-        "is-numeric",
-        "ID Number must be numeric",
-        (value) => !value || /^\d*$/.test(value)
-      )
       .required("ID Number is required")
-      .min(13, "ID Number must be 13 Digits long")
-      .max(13, "ID Number must be 13 Digits long"),
-
+      .min(13, "ID Number must be 13 digits long")
+      .max(13, "ID Number must be 13 digits long")
+      .test("is-numeric", "ID Number must be numeric", (value) =>
+        /^\d*$/.test(value)
+      ),
     accountNumber: Yup.string()
-      .test(
-        "is-numeric",
-        "Account Number must be numeric",
-        (value) => !value || /^\d*$/.test(value)
-      )
       .required("Account Number is required")
-      .min(13, "Account Number must be 11 Digits long")
-      .max(13, "Account Number must be 11 Digits long"),
-
+      .min(13, "Account Number must be 11 digits long")
+      .max(13, "Account Number must be 11 digits long")
+      .test("is-numeric", "Account Number must be numeric", (value) =>
+        /^\d*$/.test(value)
+      ),
     password: Yup.string()
       .required("Password is required")
       .min(8, "Password must be at least 8 characters")
@@ -67,8 +61,15 @@ export default function Register() {
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log("Form Values:", values);
-      // Handle form submission logic here (e.g., API call)
+      try {
+        // Call the register function from AuthContext
+        await register(values);
+        console.log("Registration successful!");
+      } catch (error) {
+        console.error("Registration failed:", error);
+      } finally {
+        formik.resetForm();
+      }
     },
   });
 
@@ -87,6 +88,7 @@ export default function Register() {
           <p className="text-sm text-blue-600">-Dizmo Beast (CEO)</p>
         </div>
       </div>
+
       <div className="flex-1 p-8 flex items-center justify-center">
         <div className="w-full max-w-md space-y-6">
           <div className="space-y-2 text-center">
@@ -210,8 +212,12 @@ export default function Register() {
                 </div>
               ) : null}
             </div>
-            <Button className="w-full bg-blue-600" type="submit">
-              Create Account
+            <Button
+              className="w-full bg-blue-600"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? "Registering..." : "Create Account"}
             </Button>
           </form>
           <div className="text-center text-sm">
