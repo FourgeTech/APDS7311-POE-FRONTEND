@@ -2,11 +2,11 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 //Define the User interface
 interface User {
-    CustomerID: String;
-    FirstName: String;
-    LastName: String;
-    Username: String;
-    Email: String;
+    customerID: String;
+    firstName: String;
+    lastName: String;
+    username: String;
+    email: String;
 }
 
 //Define the AuthContextType interface
@@ -54,9 +54,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const login = async (username: string, accountNumber: string, password: string) => {
         setLoading(true);
         try {
-        // Call your API login function
-        // Fetch user data after successful login
-        // Set the authenticated user
+            // Call your API login function
+            const respone = await fetch('https:localhost:5000/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username,
+                    accountNumber,
+                    password,
+                }),
+            });
+
+            if (respone.ok) {
+                const responeData = await respone.json();
+                const user: User = {
+                    customerID: responeData.customerID,
+                    firstName: responeData.user.firstName,
+                    lastName: responeData.user.lastName,
+                    username: responeData.user.username,
+                    email: responeData.user.email,
+                };
+                setUser(user); // Set the authenticated user
+                console.log(user);
+            }
+            else {
+                // Handle login error
+                console.log(await respone.json());
+            }
         } catch (error) {
         console.error('Login failed', error);
         throw error; // Forward error to the caller
