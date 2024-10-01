@@ -14,7 +14,7 @@ interface RegisterValues {
     lastName: string;
     email: string;
     username: string;
-    IdNumber: string;
+    IDNumber: string;
     accountNumber: string;
     password: string;
 }
