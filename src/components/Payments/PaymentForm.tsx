@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LockIcon } from 'lucide-react'; // Import the lock icon
+import {CircleDollarSign } from 'lucide-react'; // Import the lock icon
 
 interface PaymentFormData {
   amount: number;
@@ -97,7 +97,6 @@ const PaymentForm: React.FC = () => {
                 name="provider"
                 value={formik.values.provider}
                 onChange={formik.handleChange}
-                disabled
               />
             </div>
 
@@ -143,10 +142,10 @@ const PaymentForm: React.FC = () => {
         </div>
 
         <div className="w-1/2 pl-8 flex flex-col justify-center items-center">
-          <LockIcon className="h-24 w-24 text-blue-600 mb-4" />
+          <CircleDollarSign className="h-24 w-24 text-blue-600 mb-4" />
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Secure Payment</h2>
           <p className="text-gray-600 text-center">
-            Your payment is secure with us. We prioritize your financial safety.
+            Your payment is secure with us. We enusre your financial safety by reviewing each payment request before the transaction is completed.
           </p>
         </div>
       </div>
