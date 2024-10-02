@@ -9,9 +9,17 @@
     }
   ],
   "compilerOptions": {
-    "baseUrl": ".",
+    "target": "ESNext", 
+    "types": ["jest", "@testing-library/jest-dom", "@types/testing-library__react"],                       
+    "module": "ESNext",                          
+    "jsx": "react-jsx",                          
+    "strict": true,                               
+    "esModuleInterop": true,                  
+    "skipLibCheck": true,                          
+    "forceConsistentCasingInFileNames": true,     
+    "baseUrl": "./src",                            
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["*"]                                
     }
-  }
+  },
 }
