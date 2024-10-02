@@ -25,7 +25,7 @@ const validationSchema = Yup.object({
     .required('Recipient Account Number is required'),
   recipientSWIFT: Yup.string()
     .required('Recipient SWIFT Code is required')
-    .matches(/^[A-Z0-9]{8,11}$/, 'SWIFT code is invalid'),
+    .matches(/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/,"Invalid SWIFT code format."),
 });
 
 const PaymentForm: React.FC = () => {
@@ -79,9 +79,46 @@ const PaymentForm: React.FC = () => {
                 className="input" // Use your existing Input styles
               >
                 <option value="">Select currency</option>
-                <option value="USD">USD</option>
-                <option value="ZAR">ZAR</option>
-                <option value="EUR">EUR</option>
+                <option value="ZAR">South African Rand (ZAR)</option>
+                <option value="USD">United States Dollar (USD)</option>
+                <option value="GBP">Great British Pound (GBP)</option>
+                <option value="EUR">Euro (EUR)</option>
+                <option value="JPY">Japanese Yen (JPY)</option>
+                <option value="CHF">Swiss Franc (CHF)</option>
+                <option value="AUD">Australian Dollar (AUD)</option>
+                <option value="CNY">Chinese Yuan (CNY)</option>
+                <option value="INR">Indian Rupee (INR)</option>
+                <option value="BZR">Brazilian Real (BZR)</option>
+                <option value="SEK">Swedish Krona (SEK)</option>
+                <option value="HKD">Hong Kong Dollar (HKD)</option>
+                <option value="CAD">Canadian Dollar (CAD)</option>
+                <option value="NZD">New Zealand Dollar (NZD)</option>
+                <option value="SGD">Singapore Dollar (SGD)</option>
+                <option value="NOK">Norwegian Krone (NOK)</option>
+                <option value="MXN">Mexican Peso (MXN)</option>
+                <option value="BRL">Brazilian Real (BRL)</option>
+                <option value="RUB">Russian Ruble (RUB)</option>
+                <option value="KRW">South Korean Won (KRW)</option>
+                <option value="TRY">Turkish Lira (TRY)</option>
+                <option value="IDR">Indonesian Rupiah (IDR)</option>
+                <option value="PLN">Polish Zloty (PLN)</option>
+                <option value="THB">Thai Baht (THB)</option>
+                <option value="MYR">Malaysian Ringgit (MYR)</option>
+                <option value="PHP">Philippine Peso (PHP)</option>
+                <option value="CZK">Czech Koruna (CZK)</option>
+                <option value="HUF">Hungarian Forint (HUF)</option>
+                <option value="ILS">Israeli New Shekel (ILS)</option>
+                <option value="CLP">Chilean Peso (CLP)</option>
+                <option value="PKR">Pakistani Rupee (PKR)</option>
+                <option value="EGP">Egyptian Pound (EGP)</option>
+                <option value="NGN">Nigerian Naira (NGN)</option>
+                <option value="BDT">Bangladeshi Taka (BDT)</option>
+                <option value="VND">Vietnamese Dong (VND)</option>
+                <option value="COP">Colombian Peso (COP)</option>
+                <option value="SAR">Saudi Riyal (SAR)</option>
+                <option value="AED">United Arab Emirates Dirham (AED)</option>
+                <option value="QAR">Qatari Rial (QAR)</option>
+                <option value="KWD">Kuwaiti Dinar (KWD)</option>
               </select>
               {formik.touched.currency && formik.errors.currency ? (
                 <div className="text-red-500 text-sm mt-1">{formik.errors.currency}</div>
