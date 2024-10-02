@@ -13,10 +13,11 @@ jobs:
       - node/install-packages:
           pkg-manager: yarn
       - run:
-          command: yarn add jest-junit --ignore-workspace-root-check
+        name: Install Jest JUnit Reporter
+        command: yarn add jest-junit --dev
       - run:
-          name: Run tests
-          command: yarn run test --ci --runInBand --reporters=default --reporters=jest-junit
+        name: Run tests
+        command: yarn test --ci --runInBand --reporters=default --reporters=jest-junit
       - store_test_results:
           path: ./test-results/
 
