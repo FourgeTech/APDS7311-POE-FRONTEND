@@ -11,12 +11,12 @@ jobs:
     steps:
       - checkout
       - node/install-packages:
-          pkg-manager: yarn
+          pkg-manager: npm  # Changed to npm
       - run:
-          command: yarn add jest-junit --ignore-workspace-root-check
+          command: npm install jest-junit  # Install jest-junit using npm
       - run:
           name: Run tests
-          command: yarn run test --ci --runInBand --reporters=default --reporters=jest-junit
+          command: npm test -- --ci --runInBand --reporters=default --reporters=jest-junit  # Use npm test
       - store_test_results:
           path: ./test-results/
 
