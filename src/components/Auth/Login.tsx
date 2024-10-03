@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from 'react-router-dom';
 
 const BankingLoginForm = () => {
 
   // Get the login function and loading state from AuthContext
-  const { login, loading } = useAuth();
-
+  const { login, user, loading } = useAuth();
+  const navigate = useNavigate();
   // Define validation schema using Yup
   const validationSchema = Yup.object({
     username: Yup.string().required('Username is required').min(3, 'Username must be at least 3 characters')
@@ -38,7 +39,10 @@ const BankingLoginForm = () => {
         await login(values.username, values.accountNumber, values.password); // Pass username and password to login
       } catch (error) {
         console.error("Login failed:", error);
-      } finally { formik.resetForm(); }
+      } finally { 
+        formik.resetForm(); 
+        navigate('/dashboard'); // Redirect to dashboard on successful login
+      }
     },
   });
 
