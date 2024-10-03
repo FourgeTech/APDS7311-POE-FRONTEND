@@ -12,22 +12,32 @@ interface PaymentFormData {
   provider: string;
   recipientAccount: string;
   recipientSWIFT: string;
+  recipientName: string;
+  recipientBank: string;
 }
 
 // Yup validation schema
 const validationSchema = Yup.object({
-  amount: Yup.number()
-    .required('Amount is required')
-    .min(1, 'Amount must be greater than 0'),
-  currency: Yup.string()
-    .required('Currency is required'),
-  provider: Yup.string()
-  .required('Provider is required'),
-  recipientAccount: Yup.string()
-    .required('Recipient Account Number is required'),
-  recipientSWIFT: Yup.string()
-  .required('Recipient SWIFT Code is required')
-  .matches(/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/, "Invalid SWIFT code format."),
+    amount: Yup.number()
+        .required('Amount is required')
+        .min(1, 'Amount must be greater than 0'),
+    currency: Yup.string()
+        .required('Currency is required'),
+    provider: Yup.string()
+        .required('Provider is required'),
+    recipientAccount: Yup.string()
+        .required('Recipient Account Number is required'),
+        recipientSWIFT: Yup.string()
+        .required('Recipient SWIFT Code is required')
+        .test(
+          'is-valid-swift-or-na',
+          'Invalid SWIFT code format.',
+          value => value === 'N/A' || /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(value)
+        ),
+    recipientName: Yup.string()
+        .required('Recipient Name is required'),
+    recipientBank: Yup.string()
+        .required('Recipient Bank is required'),
 });
 
 const PaymentForm: React.FC = () => { 
@@ -38,6 +48,8 @@ const formik = useFormik<PaymentFormData>({
     provider: 'SWIFT',
     recipientAccount: '',
     recipientSWIFT: '',
+    recipientName: '',
+    recipientBank: '',
   },
   validationSchema: validationSchema,
   onSubmit: (values) => {
@@ -62,10 +74,12 @@ return (
       <PiggyBank className="h-12 w-12 text-blue-600" />
       <h1 className="text-2xl font-bold text-white ml-2">Fourge Tech</h1>
     </div>
-    <div className="m-auto bg-white p-8 rounded-lg shadow-md w-full max-w-4xl flex">
-      <div className="w-1/2 pr-8 border-r">
-        <h2 className="text-2xl font-bold mt-4 text-gray-800">Make a Payment</h2>
-        <form className="space-y-4" onSubmit={formik.handleSubmit}>
+    <div className="m-auto bg-white p-8 rounded-lg shadow-md w-full max-w-4xl">
+      <div className="flex justify-between">
+        {/* Left side: Amount, Currency, Provider */}
+        <div className="w-1/2 pr-4 space-y-4">
+          <h2 className="text-2xl font-bold mt-4 text-gray-800">Make a Payment</h2>
+
           {/* Amount */}
           <div>
             <Label htmlFor="amount">Amount:</Label>
@@ -94,7 +108,7 @@ return (
               value={formik.values.currency}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className={`w-full ${formik.touched.currency && formik.errors.currency ? "border-red-500" : ""}`} // Make select as wide as other inputs
+              className={`w-full ${formik.touched.currency && formik.errors.currency ? "border-red-500" : ""}`}
             >
               <option value="">Select currency</option>
               <option value="AED">United Arab Emirates Dirham (AED)</option>
@@ -151,7 +165,7 @@ return (
               value={formik.values.provider}
               onChange={handleProviderChange}
               onBlur={formik.handleBlur}
-              className={`w-full ${formik.touched.provider && formik.errors.provider ? "border-red-500" : ""}`} // Make select as wide as other inputs
+              className={`w-full ${formik.touched.provider && formik.errors.provider ? "border-red-500" : ""}`}
             >
               <option value="SWIFT">SWIFT</option>
               <option value="Other">Other</option>
@@ -160,59 +174,95 @@ return (
               <div className="text-red-500 text-sm mt-1">{formik.errors.provider}</div>
             ) : null}
           </div>
+        </div>
 
-          <h3 className="text-lg font-semibold mt-6">Recipient Information</h3>
-
-          {/* Recipient Account */}
-          <div>
-            <Label htmlFor="recipientAccount">Recipient Account Number:</Label>
-            <Input
-              type="text"
-              id="recipientAccount"
-              name="recipientAccount"
-              value={formik.values.recipientAccount}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className={`${formik.touched.recipientAccount && formik.errors.recipientAccount ? "border-red-500" : ""}`}
-            />
-            {formik.touched.recipientAccount && formik.errors.recipientAccount ? (
-              <div className="text-red-500 text-sm mt-1">{formik.errors.recipientAccount}</div>
-            ) : null}
-          </div>
-
-          {/* Recipient SWIFT */}
-          <div>
-            <Label htmlFor="recipientSWIFT">Recipient SWIFT Code:</Label>
-            <Input
-              type="text"
-              id="recipientSWIFT"
-              name="recipientSWIFT"
-              value={formik.values.recipientSWIFT}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              disabled={formik.values.provider === "Other"} // Disable if provider is "Other"
-              placeholder={formik.values.provider === "Other" ? "N/A" : ""}
-              className={`${formik.touched.recipientSWIFT && formik.errors.recipientSWIFT ? "border-red-500" : ""}`}
-            />
-            {formik.touched.recipientSWIFT && formik.errors.recipientSWIFT ? (
-              <div className="text-red-500 text-sm mt-1">{formik.errors.recipientSWIFT}</div>
-            ) : null}
-          </div>
-
-          {/* Submit Button */}
-          <Button type="submit" className="w-full">
-            Pay Now
-          </Button>
-        </form>
+        {/* Right side: Secure Payment */}
+        <div className="w-1/2 pl-4 flex flex-col justify-center items-center">
+          <CircleDollarSign className="h-24 w-24 text-blue-600 mb-4" />
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Secure Payment</h2>
+          <p className="text-gray-600 text-center">
+            Your payment is secure with us. We ensure your financial safety by reviewing each payment request before the transaction is completed.
+          </p>
+        </div>
       </div>
 
-      <div className="w-1/2 pl-8 flex flex-col justify-center items-center">
-        <CircleDollarSign className="h-24 w-24 text-blue-600 mb-4" />
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Secure Payment</h2>
-        <p className="text-gray-600 text-center">
-          Your payment is secure with us. We ensure your financial safety by reviewing each payment request before the transaction is completed.
-        </p>
+      {/* Recipient Information */}
+      <h3 className="text-lg font-semibold mt-8">Recipient Information</h3>
+
+      {/* Recipient fields: Name and Bank */}
+      <div className="flex space-x-4 mt-4">
+        <div className="w-1/2">
+          <Label htmlFor="recipientName">Recipient Name</Label>
+          <Input
+            id="recipientName"
+            name="recipientName"
+            type="text"
+            onChange={formik.handleChange}
+            value={formik.values.recipientName}
+            className={`${formik.touched.recipientName && formik.errors.recipientName ? "border-red-500" : ""}`}
+          />
+          {formik.touched.recipientName && formik.errors.recipientName ? (
+            <div className="text-red-500 text-sm mt-1">{formik.errors.recipientName}</div>
+          ) : null}
+        </div>
+
+        <div className="w-1/2">
+          <Label htmlFor="recipientBank">Recipient Bank</Label>
+          <Input
+            id="recipientBank"
+            name="recipientBank"
+            type="text"
+            onChange={formik.handleChange}
+            value={formik.values.recipientBank}
+            className={`${formik.touched.recipientBank && formik.errors.recipientBank ? "border-red-500" : ""}`}
+          />
+          {formik.touched.recipientBank && formik.errors.recipientBank ? (
+            <div className="text-red-500 text-sm mt-1">{formik.errors.recipientBank}</div>
+          ) : null}
+        </div>
       </div>
+
+      {/* Recipient fields: Account and SWIFT */}
+      <div className="flex space-x-4 mt-4">
+        <div className="w-1/2">
+          <Label htmlFor="recipientAccount">Recipient Account Number</Label>
+          <Input
+            id="recipientAccount"
+            name="recipientAccount"
+            type="text"
+            onChange={formik.handleChange}
+            value={formik.values.recipientAccount}
+            className={`${formik.touched.recipientAccount && formik.errors.recipientAccount ? "border-red-500" : ""}`}
+          />
+          {formik.touched.recipientAccount && formik.errors.recipientAccount ? (
+            <div className="text-red-500 text-sm mt-1">{formik.errors.recipientAccount}</div>
+          ) : null}
+        </div>
+
+        <div className="w-1/2">
+          <Label htmlFor="recipientSWIFT">Recipient SWIFT Code</Label>
+          <Input
+            id="recipientSWIFT"
+            name="recipientSWIFT"
+            type="text"
+            onChange={formik.handleChange}
+            value={formik.values.recipientSWIFT}
+            disabled={formik.values.provider === "Other"} // Disable if provider is "Other"
+            placeholder={formik.values.provider === "Other" ? "N/A" : ""}
+            className={`${formik.touched.recipientSWIFT && formik.errors.recipientSWIFT ? "border-red-500" : ""}`}
+          />
+          {formik.touched.recipientSWIFT && formik.errors.recipientSWIFT ? (
+            <div className="text-red-500 text-sm mt-1">{formik.errors.recipientSWIFT}</div>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Pay Now Button */}
+      <form onSubmit={formik.handleSubmit}>
+        <Button type="submit" className="w-full mt-6">
+          Pay Now
+        </Button>
+      </form>
     </div>
   </div>
 );
