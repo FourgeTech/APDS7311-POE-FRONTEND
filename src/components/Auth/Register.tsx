@@ -77,9 +77,9 @@ export default function Register() {
   return (
     <div className="flex min-h-screen">
       <div className="flex-1 bg-black p-8 flex flex-col justify-between">
-        <div>
-          <PiggyBank className="h-12 w-12 text-white" />
-          <h1 className="text-5xl font-bold text-blue-600 mt-4">Fourge Tech</h1>
+      <div className="flex items-center space-x-4">
+          <PiggyBank className="h-16 w-16 text-white" />
+          <h1 className="text-5xl font-bold text-blue-600">by Fourge Tech</h1>
         </div>
         <div className="text-white">
           <p className="text-base font-semibold mb-2">
@@ -248,7 +248,9 @@ export default function Register() {
             <a className="underline" href="#">
               Privacy Policy
             </a>
-            .
+            <p className="mt-4 text-center text-sm text-gray-600">
+            Already have an account? <a href="/login" className="text-blue-600 hover:underline">Log in Here</a>
+          </p>
           </div>
         </div>
       </div>
