@@ -4,7 +4,8 @@ import Register from "./components/Auth/Register";
 import PaymentForm from "./components/Payments/PaymentForm";
 import Dashboard from "./components/Customer/Dashboard";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
-import NotFound from './components/ui/404Page';
+import { PaymentProvider } from "./contexts/PaymentContext";
+import NotFound from "./components/ui/404Page";
 
 function App() {
   return (
@@ -18,12 +19,23 @@ function App() {
         {/* Protected Routes */}
         <Route
           path="/dashboard"
-          element={<ProtectedRoute element={<Dashboard />} />}
+          element={<ProtectedRoute element={
+            <PaymentProvider>
+          <Dashboard />
+        </PaymentProvider>} />}
         />
-         <Route
+        <Route
           path="/payment"
-          element={<ProtectedRoute element={<PaymentForm />} />}
-        />  
+          element={
+            <ProtectedRoute
+              element={
+                <PaymentProvider>
+                  <PaymentForm />
+                </PaymentProvider>
+              }
+            />
+          }
+        />
 
         {/* Catch all other routes */}
         <Route path="*" element={<NotFound />} />

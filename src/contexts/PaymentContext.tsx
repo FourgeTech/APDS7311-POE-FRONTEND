@@ -2,10 +2,12 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 
 // Define the Payment interface
 interface Payment {
-    customerID: string;
+    customerID: String;
     paymentAmount: number;
+    recipientName: string;
     currency: string;
     provider: string;
+    recipientBank: string;
     payeeAccountNumber: string;
     swiftCode: string;
 }
@@ -23,6 +25,15 @@ interface PaymentContextType {
 // Create a default value for PaymentContext
 const PaymentContext = createContext<PaymentContextType | undefined>(undefined);
 
+// Custom hook to use the PaymentContext
+export const usePayment = () => {
+    const context = useContext(PaymentContext);
+    if (context === undefined) {
+        throw new Error('usePayment must be used within a PaymentProvider');
+    }
+    return context;
+};
+
 // PaymentProvider component
 export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [payments, setPayments] = useState<Payment[]>([]);
@@ -31,16 +42,22 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
     // Function to create a new payment
     const createPayment = async (payment: Payment) => {
         setLoading(true);
+        console.log("bEFORE SENDING TO API" + JSON.stringify(payment));
         try {
-            const response = await fetch('/https://localhost:5000/payments/create', {
+            const response = await fetch('https://localhost:5000/payments/new', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(payment),
             });
-            const data = await response.json();
-            setPayments([...payments, data]);
+            if (!response.ok) {
+                const errorData = await response.json(); // Check for more specific error information from the response body
+                console.log("Error response:", errorData);
+                throw new Error(`Error ${response.status}: ${errorData.message || 'Bad Request'}`);
+            }
+            const responseData = await response.json();
+            console.log('Payment created successfully:', responseData);
         } catch (error) {
             console.error('Error creating payment:', error);
         } finally {
@@ -52,7 +69,7 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
     const getPaymentById = async (id: string): Promise<Payment | null> => {
         setLoading(true);
         try {
-            const response = await fetch(`/https://localhost:5000/payments/${id}`);
+            const response = await fetch(`https://localhost:5000/payments/${id}`);
             if (response.ok) {
                 const data = await response.json();
                 return data;
@@ -72,7 +89,7 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
     const updatePaymentStatus = async (id: string, status: string) => {
         setLoading(true);
         try {
-            await fetch(`/https://localhost:5000/payments/${id}`, {
+            await fetch(`https://localhost:5000/payments/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -91,7 +108,7 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
     const deletePayment = async (id: string) => {
         setLoading(true);
         try {
-            await fetch(`/https://localhost:5000/payments/${id}`, {
+            await fetch(`https://localhost:5000/payments/${id}`, {
                 method: 'DELETE',
             });
             setPayments(payments.filter(payment => payment.customerID !== id));
@@ -107,13 +124,4 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
             {children}
         </PaymentContext.Provider>
     );
-};
-
-// Custom hook to use the PaymentContext
-export const usePayment = () => {
-    const context = useContext(PaymentContext);
-    if (context === undefined) {
-        throw new Error('usePayment must be used within a PaymentProvider');
-    }
-    return context;
 };

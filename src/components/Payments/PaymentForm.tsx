@@ -4,9 +4,14 @@ import * as Yup from 'yup';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePayment } from "@/contexts/PaymentContext";
 import { CircleDollarSign, PiggyBank } from 'lucide-react'; // Import the lock icon and PiggyBank
 
+export default function PaymentForm() {
+
 interface PaymentFormData {
+  customerID: String;
   amount: number;
   currency: string;
   provider: string;
@@ -40,9 +45,12 @@ const validationSchema = Yup.object({
         .required('Recipient Bank is required'),
 });
 
-const PaymentForm: React.FC = () => { 
+const { user } = useAuth();
+const {createPayment} = usePayment();
+
 const formik = useFormik<PaymentFormData>({
   initialValues: {
+    customerID: user?.customerID || '',
     amount: 0,
     currency: '',
     provider: 'SWIFT',
@@ -54,6 +62,17 @@ const formik = useFormik<PaymentFormData>({
   validationSchema: validationSchema,
   onSubmit: (values) => {
     // Handle form submission
+    const paymentData = {
+      customerID: values.customerID,
+      paymentAmount: values.amount,
+      currency: values.currency,
+      recipientName: values.recipientName,
+      recipientBank: values.recipientBank,
+      provider: values.provider,
+      payeeAccountNumber: values.recipientAccount,
+      swiftCode: values.recipientSWIFT,
+    };
+    createPayment(paymentData);
     console.log('Payment Data Submitted:', values);
   },
 });
@@ -267,5 +286,3 @@ return (
   </div>
 );
 };
-
-export default PaymentForm;
