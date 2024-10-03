@@ -21,10 +21,12 @@ export default function Register() {
       .required("Username is required")
       .min(6, "Username must be at least 6 characters")
       .max(15, "Username must not exceed 15 characters")
-      .matches(/^[a-zA-Z0-9]*$/, "Username can only contain letters and numbers"),
-      
-    email: Yup.string()
-    .required("Email is required"),
+      .matches(
+        /^[a-zA-Z0-9]*$/,
+        "Username can only contain letters and numbers"
+      ),
+
+    email: Yup.string().required("Email is required"),
 
     IDNumber: Yup.string()
       .required("ID Number is required")
@@ -104,7 +106,9 @@ export default function Register() {
           <form className="space-y-3" onSubmit={formik.handleSubmit}>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <Label htmlFor="first-name" className="text-sm">First name</Label>
+                <Label htmlFor="first-name" className="text-sm">
+                  First name
+                </Label>
                 <Input
                   id="first-name"
                   placeholder="John"
@@ -122,7 +126,9 @@ export default function Register() {
                 ) : null}
               </div>
               <div className="space-y-1">
-                <Label htmlFor="last-name" className="text-sm">Last name</Label>
+                <Label htmlFor="last-name" className="text-sm">
+                  Last name
+                </Label>
                 <Input
                   id="last-name"
                   placeholder="Doe"
@@ -141,7 +147,9 @@ export default function Register() {
               </div>
             </div>
             <div className="space-y-1">
-              <Label htmlFor="email" className="text-sm">Email</Label>
+              <Label htmlFor="email" className="text-sm">
+                Email
+              </Label>
               <Input
                 id="email"
                 placeholder="fourgetech@gmail.com"
@@ -159,7 +167,9 @@ export default function Register() {
               ) : null}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="username" className="text-sm">Username</Label>
+              <Label htmlFor="username" className="text-sm">
+                Username
+              </Label>
               <Input
                 id="username"
                 placeholder="johndoe"
@@ -177,7 +187,9 @@ export default function Register() {
               ) : null}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="IDNumber" className="text-sm">ID Number</Label>
+              <Label htmlFor="IDNumber" className="text-sm">
+                ID Number
+              </Label>
               <Input
                 id="IDNumber"
                 placeholder="0303177043187"
@@ -195,7 +207,9 @@ export default function Register() {
               ) : null}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="account-number" className="text-sm">Account Number</Label>
+              <Label htmlFor="account-number" className="text-sm">
+                Account Number
+              </Label>
               <Input
                 id="account-number"
                 placeholder="12345678987"
@@ -213,7 +227,9 @@ export default function Register() {
               ) : null}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="password" className="text-sm">Password</Label>
+              <Label htmlFor="password" className="text-sm">
+                Password
+              </Label>
               <Input
                 id="password"
                 placeholder="************"
@@ -231,12 +247,8 @@ export default function Register() {
                 </div>
               ) : null}
             </div>
-            <Button
-              className="w-full bg-blue-600"
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? "Registering..." : "Create Account"}
+            <Button className="w-full bg-blue-600" type="submit">
+              {loading ? 'Registering...' : 'Create Account'}
             </Button>
           </form>
           <div className="text-center text-xs">
