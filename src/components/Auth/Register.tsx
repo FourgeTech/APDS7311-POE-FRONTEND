@@ -21,11 +21,11 @@ export default function Register() {
       .required("Username is required")
       .min(6, "Username must be at least 6 characters")
       .max(15, "Username must not exceed 15 characters")
-      .matches(/^[a-zA-Z0-9]*$/, "Username can only contain letters and numbers"),
-      
-    email: Yup.string()
-    .required("Email is required"),
-
+      .matches(
+        /^[a-zA-Z0-9]*$/,
+        "Username can only contain letters and numbers"
+      ),
+    email: Yup.string().required("Email is required"),
     IDNumber: Yup.string()
       .required("ID Number is required")
       .min(13, "ID Number must be 13 digits long")
@@ -47,6 +47,9 @@ export default function Register() {
       .matches(/[a-z]/, "Password must contain at least one lowercase letter")
       .matches(/[0-9]/, "Password must contain at least one number")
       .matches(/[\W_]/, "Password must contain at least one special character"),
+    confirmPassword: Yup.string()
+      .required("Confirm Password is required")
+      .oneOf([Yup.ref('password'), null], 'Passwords must match')
   });
 
   // Initialize Formik
@@ -59,6 +62,7 @@ export default function Register() {
       IDNumber: "",
       accountNumber: "",
       password: "",
+      confirmPassword: ""
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -104,7 +108,9 @@ export default function Register() {
           <form className="space-y-3" onSubmit={formik.handleSubmit}>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <Label htmlFor="first-name" className="text-sm">First name</Label>
+                <Label htmlFor="first-name" className="text-sm">
+                  First name
+                </Label>
                 <Input
                   id="first-name"
                   placeholder="John"
@@ -122,7 +128,9 @@ export default function Register() {
                 ) : null}
               </div>
               <div className="space-y-1">
-                <Label htmlFor="last-name" className="text-sm">Last name</Label>
+                <Label htmlFor="last-name" className="text-sm">
+                  Last name
+                </Label>
                 <Input
                   id="last-name"
                   placeholder="Doe"
@@ -141,7 +149,9 @@ export default function Register() {
               </div>
             </div>
             <div className="space-y-1">
-              <Label htmlFor="email" className="text-sm">Email</Label>
+              <Label htmlFor="email" className="text-sm">
+                Email
+              </Label>
               <Input
                 id="email"
                 placeholder="fourgetech@gmail.com"
@@ -159,7 +169,9 @@ export default function Register() {
               ) : null}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="username" className="text-sm">Username</Label>
+              <Label htmlFor="username" className="text-sm">
+                Username
+              </Label>
               <Input
                 id="username"
                 placeholder="johndoe"
@@ -177,7 +189,9 @@ export default function Register() {
               ) : null}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="IDNumber" className="text-sm">ID Number</Label>
+              <Label htmlFor="IDNumber" className="text-sm">
+                ID Number
+              </Label>
               <Input
                 id="IDNumber"
                 placeholder="0303177043187"
@@ -195,7 +209,9 @@ export default function Register() {
               ) : null}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="account-number" className="text-sm">Account Number</Label>
+              <Label htmlFor="account-number" className="text-sm">
+                Account Number
+              </Label>
               <Input
                 id="account-number"
                 placeholder="12345678987"
@@ -213,7 +229,9 @@ export default function Register() {
               ) : null}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="password" className="text-sm">Password</Label>
+              <Label htmlFor="password" className="text-sm">
+                Password
+              </Label>
               <Input
                 id="password"
                 placeholder="************"
@@ -231,12 +249,29 @@ export default function Register() {
                 </div>
               ) : null}
             </div>
-            <Button
-              className="w-full bg-blue-600"
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? "Registering..." : "Create Account"}
+            <div className="space-y-1">
+              <Label htmlFor="confirm-password" className="text-sm">
+                Confirm Password
+              </Label>
+              <Input
+                id="confirm-password"
+                placeholder="************"
+                type="password"
+                {...formik.getFieldProps("confirmPassword")}
+                className={`${
+                  formik.touched.confirmPassword && formik.errors.confirmPassword
+                    ? "border-red-500"
+                    : ""
+                }`}
+              />
+              {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
+                <div className="text-red-500 text-xs mt-1">
+                  {formik.errors.confirmPassword}
+                </div>
+              ) : null}
+            </div>
+            <Button className="w-full bg-blue-600" type="submit">
+              {loading ? 'Registering...' : 'Create Account'}
             </Button>
           </form>
           <div className="text-center text-xs">
