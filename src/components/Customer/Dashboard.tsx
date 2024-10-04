@@ -232,7 +232,7 @@ function Overview({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${availableBalance.toFixed(2)}
+              R{availableBalance.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">Updated just now</p>
           </CardContent>
@@ -246,7 +246,7 @@ function Overview({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${latestBalance.toFixed(2)}
+              R{latestBalance.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">Updated just now</p>
           </CardContent>
@@ -257,7 +257,7 @@ function Overview({
             <ArrowUpIcon className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalSent.toFixed(2)}</div>
+            <div className="text-2xl font-bold">R{totalSent.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">Updated just now</p>
           </CardContent>
         </Card>
@@ -270,7 +270,7 @@ function Overview({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${totalReceived.toFixed(2)}
+              R{totalReceived.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">Updated just now</p>
           </CardContent>
@@ -293,7 +293,6 @@ function Transactions({ transactions }: TransactionListProps) {
                 <TableHead>Recipient Name</TableHead>
                 <TableHead>Recipient Bank</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
-                <TableHead>Currency</TableHead>
                 <TableHead>Provider</TableHead>
                 <TableHead>Recipient Account Number</TableHead>
                 <TableHead className="text-right">Status</TableHead>
@@ -305,8 +304,7 @@ function Transactions({ transactions }: TransactionListProps) {
                   <TableCell>{new Date(transaction.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>{transaction.recipientName}</TableCell>
                   <TableCell>{transaction.recipientBank}</TableCell>
-                  <TableCell className="text-right">${transaction.paymentAmount.toFixed(2)}</TableCell>
-                  <TableCell>{transaction.currency}</TableCell>
+                  <TableCell className="text-right">R{transaction.paymentAmount.toFixed(2)}</TableCell>
                   <TableCell>{transaction.provider}</TableCell>
                   <TableCell>{transaction.payeeAccountNumber}</TableCell>
                   <TableCell className="text-right">{transaction.paymentStatus}</TableCell>

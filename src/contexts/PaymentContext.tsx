@@ -1,3 +1,4 @@
+// src/contexts/PaymentContext.tsx
 import { createContext, useContext, useState, ReactNode } from 'react';
 
 // Define the Payment interface
@@ -19,6 +20,7 @@ interface PaymentContextType {
     getPaymentById: (id: string) => Promise<Payment | null>;
     updatePaymentStatus: (id: string, status: string) => Promise<void>;
     deletePayment: (id: string) => Promise<void>;
+    convertCurrency: (amount: number, from: string, to: string) => number;
     loading: boolean;
 }
 
@@ -42,7 +44,6 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
     // Function to create a new payment
     const createPayment = async (payment: Payment) => {
         setLoading(true);
-        console.log("bEFORE SENDING TO API" + JSON.stringify(payment));
         try {
             const response = await fetch('https://localhost:5000/payments/new', {
                 method: 'POST',
@@ -119,8 +120,27 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
     };
 
+    // Function to convert currency with hardcoded exchange rates
+    const convertCurrency = (amount: number, from: string, to: string): number => {
+        const exchangeRates: { [key: string]: number } = {
+            'USD': 15.0,  // Example rate: 1 USD = 15 ZAR
+            'ZAR': 1,     // 1 ZAR = 1 ZAR
+            'GBP': 20.7,  // Example rate: 1 GBP = 20.7 ZAR
+            'EUR': 17.7   // Example rate: 1 EUR = 17.7 ZAR
+        };
+
+        if (from === 'ZAR') {
+            return amount / exchangeRates[to];
+        } else if (to === 'ZAR') {
+            return amount * exchangeRates[from];
+        } else {
+            const amountInZAR = amount * exchangeRates[from];
+            return amountInZAR / exchangeRates[to];
+        }
+    };
+
     return (
-        <PaymentContext.Provider value={{ payments, createPayment, getPaymentById, updatePaymentStatus, deletePayment, loading }}>
+        <PaymentContext.Provider value={{ payments, createPayment, getPaymentById, updatePaymentStatus, deletePayment, convertCurrency, loading }}>
             {children}
         </PaymentContext.Provider>
     );

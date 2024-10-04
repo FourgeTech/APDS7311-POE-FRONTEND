@@ -47,8 +47,27 @@ export default function PaymentForm() {
     recipientBank: Yup.string().required("Recipient Bank is required"),
   });
 
+  const convertCurrency = (amount: number, from: string, to: string): number => {
+    const exchangeRates: { [key: string]: number } = {
+      'USD': 15.0,  // Example rate: 1 USD = 15 ZAR
+      'ZAR': 1,     // 1 ZAR = 1 ZAR
+      'GBP': 20.7,  // Example rate: 1 GBP = 20.7 ZAR
+      'EUR': 17.7   // Example rate: 1 EUR = 17.7 ZAR
+    };
+  
+    if (from === 'ZAR') {
+      return amount / exchangeRates[to];
+    } else if (to === 'ZAR') {
+      return amount * exchangeRates[from];
+    } else {
+      const amountInZAR = amount * exchangeRates[from];
+      return amountInZAR / exchangeRates[to];
+    }
+  };
+
   const { user } = useAuth();
   const { createPayment } = usePayment();
+
 
   const formik = useFormik<PaymentFormData>({
     initialValues: {
@@ -74,7 +93,17 @@ export default function PaymentForm() {
         payeeAccountNumber: values.recipientAccount,
         swiftCode: values.recipientSWIFT,
       };
-      createPayment(paymentData);
+
+      const convertedAmount = convertCurrency(values.amount, values.currency, 'ZAR');
+      values.amount = convertedAmount; // Change the value of values.amount to the converted value
+
+      const updatedPaymentData = {
+        ...paymentData,
+        paymentAmount: convertedAmount, // Use the converted amount here
+        currency: 'ZAR', // Set the currency to ZAR
+      };
+
+      createPayment(updatedPaymentData);
       console.log("Payment Data Submitted:", values);
       setShowAlert(true);
       resetForm();
@@ -155,45 +184,10 @@ export default function PaymentForm() {
                     : ""
                 }`}
               >
-                <option value="">Select currency</option>
-                <option value="AED">United Arab Emirates Dirham (AED)</option>
-                <option value="AUD">Australian Dollar (AUD)</option>
-                <option value="BDT">Bangladeshi Taka (BDT)</option>
-                <option value="BRL">Brazilian Real (BRL)</option>
-                <option value="BZR">Brazilian Real (BZR)</option>
-                <option value="CAD">Canadian Dollar (CAD)</option>
-                <option value="CHF">Swiss Franc (CHF)</option>
-                <option value="CLP">Chilean Peso (CLP)</option>
-                <option value="CNY">Chinese Yuan (CNY)</option>
-                <option value="COP">Colombian Peso (COP)</option>
-                <option value="CZK">Czech Koruna (CZK)</option>
-                <option value="EGP">Egyptian Pound (EGP)</option>
+                <option value="">Select Currency</option>                
                 <option value="EUR">Euro (EUR)</option>
                 <option value="GBP">Great British Pound (GBP)</option>
-                <option value="HKD">Hong Kong Dollar (HKD)</option>
-                <option value="HUF">Hungarian Forint (HUF)</option>
-                <option value="IDR">Indonesian Rupiah (IDR)</option>
-                <option value="ILS">Israeli New Shekel (ILS)</option>
-                <option value="INR">Indian Rupee (INR)</option>
-                <option value="JPY">Japanese Yen (JPY)</option>
-                <option value="KRW">South Korean Won (KRW)</option>
-                <option value="KWD">Kuwaiti Dinar (KWD)</option>
-                <option value="MXN">Mexican Peso (MXN)</option>
-                <option value="MYR">Malaysian Ringgit (MYR)</option>
-                <option value="NGN">Nigerian Naira (NGN)</option>
-                <option value="NOK">Norwegian Krone (NOK)</option>
-                <option value="NZD">New Zealand Dollar (NZD)</option>
-                <option value="PKR">Pakistani Rupee (PKR)</option>
-                <option value="PLN">Polish Zloty (PLN)</option>
-                <option value="QAR">Qatari Rial (QAR)</option>
-                <option value="RUB">Russian Ruble (RUB)</option>
-                <option value="SAR">Saudi Riyal (SAR)</option>
-                <option value="SEK">Swedish Krona (SEK)</option>
-                <option value="SGD">Singapore Dollar (SGD)</option>
-                <option value="THB">Thai Baht (THB)</option>
-                <option value="TRY">Turkish Lira (TRY)</option>
                 <option value="USD">United States Dollar (USD)</option>
-                <option value="VND">Vietnamese Dong (VND)</option>
                 <option value="ZAR">South African Rand (ZAR)</option>
               </select>
               {formik.touched.currency && formik.errors.currency ? (
