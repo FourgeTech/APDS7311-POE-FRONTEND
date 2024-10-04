@@ -25,9 +25,7 @@ export default function Register() {
         /^[a-zA-Z0-9]*$/,
         "Username can only contain letters and numbers"
       ),
-
     email: Yup.string().required("Email is required"),
-
     IDNumber: Yup.string()
       .required("ID Number is required")
       .min(13, "ID Number must be 13 digits long")
@@ -49,6 +47,9 @@ export default function Register() {
       .matches(/[a-z]/, "Password must contain at least one lowercase letter")
       .matches(/[0-9]/, "Password must contain at least one number")
       .matches(/[\W_]/, "Password must contain at least one special character"),
+    confirmPassword: Yup.string()
+      .required("Confirm Password is required")
+      .oneOf([Yup.ref('password'), null], 'Passwords must match')
   });
 
   // Initialize Formik
@@ -61,6 +62,7 @@ export default function Register() {
       IDNumber: "",
       accountNumber: "",
       password: "",
+      confirmPassword: ""
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -244,6 +246,27 @@ export default function Register() {
               {formik.touched.password && formik.errors.password ? (
                 <div className="text-red-500 text-xs mt-1">
                   {formik.errors.password}
+                </div>
+              ) : null}
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="confirm-password" className="text-sm">
+                Confirm Password
+              </Label>
+              <Input
+                id="confirm-password"
+                placeholder="************"
+                type="password"
+                {...formik.getFieldProps("confirmPassword")}
+                className={`${
+                  formik.touched.confirmPassword && formik.errors.confirmPassword
+                    ? "border-red-500"
+                    : ""
+                }`}
+              />
+              {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
+                <div className="text-red-500 text-xs mt-1">
+                  {formik.errors.confirmPassword}
                 </div>
               ) : null}
             </div>
