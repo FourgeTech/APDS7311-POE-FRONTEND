@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import DepositFunds from './DepositFunds';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -40,6 +43,26 @@ interface Transaction {
   createdAt: string;
 }
 
+const validationSchema = yup.object({
+  amount: yup
+    .number()
+    .typeError('Amount must be a number')
+    .positive('Amount must be a positive number')
+    .required('Amount is required'),
+  cardNumber: yup
+    .string()
+    .matches(/^\d{16}$/, 'Card number must be 16 digits long')
+    .required('Card number is required'),
+  expiryDate: yup
+    .string()
+    .matches(/^(0[1-9]|1[0-2])\/?([0-9]{4}|[0-9]{2})$/, 'Invalid expiry date format')
+    .required('Expiry date is required'),
+  cvv: yup
+    .string()
+    .matches(/^\d{3,4}$/, 'CVV must be 3 or 4 digits long')
+    .required('CVV is required'),
+});
+
 interface TransactionListProps {
   transactions: Transaction[];
 }
@@ -52,6 +75,7 @@ export default function Dashboard() {
   const [showAccountNumber, setShowAccountNumber] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isDepositOpen, setIsDepositOpen] = useState(false);
 
   // Step 2: Add state variables to store API data
   const [accountNumber, setAccountNumber] = useState<string>("");
@@ -73,6 +97,19 @@ export default function Dashboard() {
     setShowAccountNumber(!showAccountNumber);
   };
 
+  const fetchTransactions = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`https://localhost:5000/payments/customer/${user?.customerID}`);
+      const data = await response.json();
+      setTransactions(data);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadDatafromAPI = async () => {
     try {
       const id = user?.customerID;
@@ -90,19 +127,6 @@ export default function Dashboard() {
       setTotalReceived(data.totalReceived);
     } catch (error) {
       console.error("Error fetching data", error);
-    }
-  };
-
-  const fetchTransactions = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`https://localhost:5000/payments/customer/${user?.customerID}`);
-      const data = await response.json();
-      setTransactions(data);
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -185,9 +209,9 @@ export default function Dashboard() {
               </Button>
             </div>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => setIsDepositOpen(true)}>
             <CreditCard className="mr-2 h-4 w-4" />
-            Manage Cards
+            Deposit Funds
           </Button>
         </header>
 
@@ -202,6 +226,7 @@ export default function Dashboard() {
           )}
           {activeSection === "Transactions" && <Transactions transactions={transactions} />}
           {activeSection === "Payments" && <Payments />}
+          <DepositFunds isOpen={isDepositOpen} setIsOpen={setIsDepositOpen} />
         </div>
       </main>
     </div>
