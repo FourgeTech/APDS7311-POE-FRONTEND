@@ -1,79 +1,85 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePayment } from "@/contexts/PaymentContext";
-import { CircleDollarSign, PiggyBank } from 'lucide-react'; // Import the lock icon and PiggyBank
+import { CircleDollarSign, PiggyBank } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function PaymentForm() {
+  const [showAlert, setShowAlert] = useState(false);
+  const navigate = useNavigate();
 
-interface PaymentFormData {
-  customerID: String;
-  amount: number;
-  currency: string;
-  provider: string;
-  recipientAccount: string;
-  recipientSWIFT: string;
-  recipientName: string;
-  recipientBank: string;
-}
+  interface PaymentFormData {
+    customerID: String;
+    amount: number;
+    currency: string;
+    provider: string;
+    recipientAccount: string;
+    recipientSWIFT: string;
+    recipientName: string;
+    recipientBank: string;
+  }
 
-// Yup validation schema
-const validationSchema = Yup.object({
-  amount: Yup.number()
-    .required("Amount is required")
-    .min(1, "Amount must be greater than 0"),
-  currency: Yup.string().required("Currency is required"),
-  provider: Yup.string().required("Provider is required"),
-  recipientAccount: Yup.string().required(
-    "Recipient Account Number is required"
-  ),
-  recipientSWIFT: Yup.string()
-    .required("Recipient SWIFT Code is required")
-    .test(
-      "is-valid-swift-or-na",
-      "Invalid SWIFT code format.",
-      (value) =>
-        value === "N/A" || /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(value)
+  // Yup validation schema
+  const validationSchema = Yup.object({
+    amount: Yup.number()
+      .required("Amount is required")
+      .min(1, "Amount must be greater than 0"),
+    currency: Yup.string().required("Currency is required"),
+    provider: Yup.string().required("Provider is required"),
+    recipientAccount: Yup.string().required(
+      "Recipient Account Number is required"
     ),
-  recipientName: Yup.string().required("Recipient Name is required"),
-  recipientBank: Yup.string().required("Recipient Bank is required"),
-});
+    recipientSWIFT: Yup.string()
+      .required("Recipient SWIFT Code is required")
+      .test(
+        "is-valid-swift-or-na",
+        "Invalid SWIFT code format.",
+        (value) =>
+          value === "N/A" || /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(value)
+      ),
+    recipientName: Yup.string().required("Recipient Name is required"),
+    recipientBank: Yup.string().required("Recipient Bank is required"),
+  });
 
-const { user } = useAuth();
-const {createPayment} = usePayment();
+  const { user } = useAuth();
+  const { createPayment } = usePayment();
 
-const formik = useFormik<PaymentFormData>({
-  initialValues: {
-    customerID: user?.customerID || '',
-    amount: 0,
-    currency: '',
-    provider: 'SWIFT',
-    recipientAccount: '',
-    recipientSWIFT: '',
-    recipientName: '',
-    recipientBank: '',
-  },
-  validationSchema: validationSchema,
-  onSubmit: (values) => {
-    // Handle form submission
-    const paymentData = {
-      customerID: values.customerID,
-      paymentAmount: values.amount,
-      currency: values.currency,
-      recipientName: values.recipientName,
-      recipientBank: values.recipientBank,
-      provider: values.provider,
-      payeeAccountNumber: values.recipientAccount,
-      swiftCode: values.recipientSWIFT,
-    };
-    createPayment(paymentData);
-    console.log('Payment Data Submitted:', values);
-  },
-});
+  const formik = useFormik<PaymentFormData>({
+    initialValues: {
+      customerID: user?.customerID || "",
+      amount: 0,
+      currency: "",
+      provider: "SWIFT",
+      recipientAccount: "",
+      recipientSWIFT: "",
+      recipientName: "",
+      recipientBank: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: (values, { resetForm }) => {
+      // Handle form submission
+      const paymentData = {
+        customerID: values.customerID,
+        paymentAmount: values.amount,
+        currency: values.currency,
+        recipientName: values.recipientName,
+        recipientBank: values.recipientBank,
+        provider: values.provider,
+        payeeAccountNumber: values.recipientAccount,
+        swiftCode: values.recipientSWIFT,
+      };
+      createPayment(paymentData);
+      console.log("Payment Data Submitted:", values);
+      setShowAlert(true);
+      resetForm();
+    },
+  });
 
   // Handle provider change to set SWIFT code value and placeholder
   const handleProviderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -83,6 +89,16 @@ const formik = useFormik<PaymentFormData>({
     } else {
       formik.setFieldValue("recipientSWIFT", "");
     }
+  };
+
+  const handleCancel = () => {
+    formik.resetForm();
+    navigate("/dashboard");
+  };
+
+  const handleCloseAlert = () => {
+    setShowAlert(false);
+    navigate("/dashboard");
   };
 
   return (
@@ -325,16 +341,34 @@ const formik = useFormik<PaymentFormData>({
         </div>
 
         {/* Pay Now Button */}
-        {/* Pay Now Button */}
         <form onSubmit={formik.handleSubmit} className="flex space-x-4 mt-6">
           <Button type="submit" className="w-full">
             Pay Now
           </Button>
-          <Button type="button" className="w-full">
+          <Button type="button" className="w-full" onClick={handleCancel}>
             Cancel
           </Button>
         </form>
       </div>
+
+      {/* Alert Popup */}
+      {showAlert && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <Alert>
+              <PiggyBank className="h-4 w-4" />
+              <AlertTitle>Please Note!</AlertTitle>
+              <AlertDescription>
+                Your payment is being processed. We will notify you once the
+                transaction is approved.
+              </AlertDescription>
+            </Alert>
+            <Button onClick={handleCloseAlert} className="mt-4">
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
+}

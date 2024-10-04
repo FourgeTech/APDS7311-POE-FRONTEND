@@ -5,9 +5,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CreditCard, Globe, LogOut, Menu as MenuIcon, RefreshCcw } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import PaymentForm from "../Payments/PaymentForm";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   // Step 1: Add state to track selected sidebar item
   const [activeSection, setActiveSection] = useState<string>("Overview");
@@ -49,8 +51,7 @@ export default function Dashboard() {
             </Button>
             <Button
               variant="ghost"
-              className="w-full justify-start"
-              onClick={() => setActiveSection("Payments")}
+              onClick={() => navigate('/payment')}
             >
               <RefreshCcw className="mr-2 h-4 w-4" />
               Payments
