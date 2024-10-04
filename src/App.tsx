@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useRef } from "react";
 import BankingLoginForm from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 import PaymentForm from "./components/Payments/PaymentForm";
@@ -15,15 +15,24 @@ function App() {
     throw new Error("AuthContext must be used within an AuthProvider");
   }
   const { logout } = authContext;
+  const isTabHidden = useRef(false);
 
   useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      logout();
+    const handleVisibilityChange = () => {
+      isTabHidden.current = document.hidden;
     };
 
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isTabHidden.current) {
+        logout();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [logout]);

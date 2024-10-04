@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 import {
   Dialog,
   DialogContent,
@@ -57,6 +59,8 @@ const { user } = useAuth();
       setIsOpen(false);
     },
   });
+
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -140,6 +144,8 @@ const register = async (values: DepositFundsFormValues) => {
 
       if (response.ok) {
         const responseData = await response.json();
+        const navigate = useNavigate();
+        navigate("/dashboard");
         
         console.log("Deposit successful:");
       } else {
