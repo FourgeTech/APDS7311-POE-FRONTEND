@@ -1,18 +1,64 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CreditCard, Globe, LogOut, Menu as MenuIcon, RefreshCcw } from "lucide-react";
+import {
+  CreditCard,
+  Globe,
+  LogOut,
+  Menu as MenuIcon,
+  RefreshCcw,
+  ArrowUpIcon,
+  Wallet,
+  ArrowDownIcon,
+  DollarSign,
+  EyeOff,
+  Eye,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import PaymentForm from "../Payments/PaymentForm";
 import { Navigate, useNavigate } from "react-router-dom";
 
+interface Transaction {
+  _id: string;
+  recipientName: string;
+  recipientBank: string;
+  paymentAmount: number;
+  currency: string;
+  provider: string;
+  payeeAccountNumber: string;
+  paymentStatus: string;
+  createdAt: string;
+}
+
+interface TransactionListProps {
+  transactions: Transaction[];
+}
+
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-
   // Step 1: Add state to track selected sidebar item
   const [activeSection, setActiveSection] = useState<string>("Overview");
+  const [showAccountNumber, setShowAccountNumber] = useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Step 2: Add state variables to store API data
+  const [accountNumber, setAccountNumber] = useState<string>("");
+  const [availableBalance, setAvailableBalance] = useState<number>(0);
+  const [latestBalance, setLatestBalance] = useState<number>(0);
+  const [totalSent, setTotalSent] = useState<number>(0);
+  const [totalReceived, setTotalReceived] = useState<number>(0);
 
   const handleLogout = async () => {
     try {
@@ -23,7 +69,50 @@ export default function Dashboard() {
     }
   };
 
-  // Step 2: Sidebar buttons now change the active section
+  const toggleAccountNumber = () => {
+    setShowAccountNumber(!showAccountNumber);
+  };
+
+  const loadDatafromAPI = async () => {
+    try {
+      const id = user?.customerID;
+      const response = await fetch(
+        "https://localhost:5000/payments/dashboard/" + id
+      );
+      const data = await response.json();
+      console.log(data);
+
+      // Step 3: Update state variables with the fetched data
+      setAccountNumber(data.accountNumber);
+      setAvailableBalance(data.availableBalance);
+      setLatestBalance(data.latestBalance);
+      setTotalSent(data.totalSent);
+      setTotalReceived(data.totalReceived);
+    } catch (error) {
+      console.error("Error fetching data", error);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`https://localhost:5000/payments/customer/${user?.customerID}`);
+      const data = await response.json();
+      setTransactions(data);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 4: Call loadDatafromAPI when the component mounts
+  useEffect(() => {
+    loadDatafromAPI();
+    fetchTransactions();
+  }, []); // Empty dependency array ensures this runs only once when the component mounts
+
+  // Step 5: Sidebar buttons now change the active section
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
@@ -49,10 +138,7 @@ export default function Dashboard() {
               <CreditCard className="mr-2 h-4 w-4" />
               Transactions
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/payment')}
-            >
+            <Button variant="ghost" onClick={() => navigate("/payment")}>
               <RefreshCcw className="mr-2 h-4 w-4" />
               Payments
             </Button>
@@ -73,73 +159,161 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 overflow-hidden">
         <header className="bg-white border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Welcome back, {user?.firstName}</h2>
+          <div>
+            <h2 className="text-xl font-semibold">
+              Welcome back, {user?.firstName}
+            </h2>
+            <div className="flex items-center mt-1">
+              <p className="text-sm text-gray-600 mr-2">Account Number: </p>
+              <p className="text-sm font-medium mr-2">
+                {showAccountNumber ? accountNumber : "***********"}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-0"
+                onClick={toggleAccountNumber}
+              >
+                {showAccountNumber ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+                <span className="sr-only">
+                  {showAccountNumber ? "Hide" : "Show"} account number
+                </span>
+              </Button>
+            </div>
+          </div>
+          <Button variant="outline" size="sm">
+            <CreditCard className="mr-2 h-4 w-4" />
+            Manage Cards
+          </Button>
         </header>
 
-        {/* Step 3: Conditionally render main content based on activeSection */}
         <div className="p-6 space-y-6 overflow-y-auto h-[calc(100vh-5rem)]">
           {activeSection === "Overview" && (
-            <Overview />
+            <Overview
+              availableBalance={availableBalance}
+              latestBalance={latestBalance}
+              totalSent={totalSent}
+              totalReceived={totalReceived}
+            />
           )}
-          {activeSection === "Transactions" && (
-            <Transactions />
-          )}
-          {activeSection === "Payments" && (
-            <Payments />
-          )}
+          {activeSection === "Transactions" && <Transactions transactions={transactions} />}
+          {activeSection === "Payments" && <Payments />}
         </div>
       </main>
     </div>
   );
 }
+interface OverviewProps {
+  availableBalance: number; // Adjust the type as necessary
+  latestBalance: number; // Adjust the type as necessary
+  totalSent: number; // Adjust the type as necessary
+  totalReceived: number; // Adjust the type as necessary
+}
 
-// Step 4: Define separate components for each section
-function Overview() {
+function Overview({
+  availableBalance,
+  latestBalance,
+  totalSent,
+  totalReceived,
+}: OverviewProps) {
   return (
-    <section className="grid gap-6 md:grid-cols-2">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Current Balance</CardTitle>
-          <CreditCard className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">$1,500.00</div>
-          <p className="text-xs text-muted-foreground">Acc No: XXXXXXXXXX</p>
-        </CardContent>
-      </Card>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Button size="lg" className="h-full">
-          <CreditCard className="mr-2 h-5 w-5" />
-          Local Payment
-        </Button>
-        <Button size="lg" className="h-full">
-          <Globe className="mr-2 h-5 w-5" />
-          International
-        </Button>
-      </div>
-    </section>
+    <div className="space-y-6">
+      <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Available Balance
+            </CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              ${availableBalance.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground">Updated just now</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Latest Balance
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              ${latestBalance.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground">Updated just now</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Sent</CardTitle>
+            <ArrowUpIcon className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${totalSent.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">Updated just now</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Received
+            </CardTitle>
+            <ArrowDownIcon className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              ${totalReceived.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground">Updated just now</p>
+          </CardContent>
+        </Card>
+      </section>
+    </div>
   );
 }
 
-function Transactions() {
+function Transactions({ transactions }: TransactionListProps) {
   return (
     <section>
       <h3 className="text-lg font-semibold mb-4">Recent Transactions</h3>
       <Card>
         <CardContent className="p-0">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left p-4 font-medium">Date</th>
-                <th className="text-left p-4 font-medium">Description</th>
-                <th className="text-right p-4 font-medium">Amount</th>
-                <th className="text-right p-4 font-medium">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-             
-            </tbody>
-          </table>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Recipient Name</TableHead>
+                <TableHead>Recipient Bank</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+                <TableHead>Currency</TableHead>
+                <TableHead>Provider</TableHead>
+                <TableHead>Recipient Account Number</TableHead>
+                <TableHead className="text-right">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transactions.map((transaction) => (
+                <TableRow key={transaction._id}>
+                  <TableCell>{new Date(transaction.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>{transaction.recipientName}</TableCell>
+                  <TableCell>{transaction.recipientBank}</TableCell>
+                  <TableCell className="text-right">${transaction.paymentAmount.toFixed(2)}</TableCell>
+                  <TableCell>{transaction.currency}</TableCell>
+                  <TableCell>{transaction.provider}</TableCell>
+                  <TableCell>{transaction.payeeAccountNumber}</TableCell>
+                  <TableCell className="text-right">{transaction.paymentStatus}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </section>
@@ -147,7 +321,5 @@ function Transactions() {
 }
 
 function Payments() {
-  return (
-    <PaymentForm />
-  );
+  return <PaymentForm />;
 }
