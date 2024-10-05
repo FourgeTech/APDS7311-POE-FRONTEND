@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useContext } from "react";
 import BankingLoginForm from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
-import PaymentForm from "./components/Payments/PaymentForm";
+import PaymentForm from "./components/Customer/PaymentForm";
 import Dashboard from "./components/Customer/Dashboard";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import { PaymentProvider } from "./contexts/PaymentContext";
@@ -14,20 +14,7 @@ function App() {
   if (!authContext) {
     throw new Error("AuthContext must be used within an AuthProvider");
   }
-  const { logout } = authContext;
-
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      logout();
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [logout]);
-
+  
   return (
     <div>
       <Routes>

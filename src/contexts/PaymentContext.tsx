@@ -1,6 +1,10 @@
 // src/contexts/PaymentContext.tsx
 import { createContext, useContext, useState, ReactNode } from 'react';
 
+const getToken = () => localStorage.getItem('jwtToken');
+import axios from 'axios';
+import { set } from 'react-hook-form';
+
 // Define the Payment interface
 interface Payment {
     customerID: String;
@@ -13,10 +17,18 @@ interface Payment {
     swiftCode: string;
 }
 
+interface DepositFunds {
+    amount: number;
+    cardNumber: string;
+    expiryDate: string;
+    cvv: string;
+  }
+
 // Define the PaymentContextType interface
 interface PaymentContextType {
     payments: Payment[];
     createPayment: (payment: Payment) => Promise<void>;
+    createDeposit: (values: DepositFunds) => Promise<void>;
     getPaymentById: (id: string) => Promise<Payment | null>;
     updatePaymentStatus: (id: string, status: string) => Promise<void>;
     deletePayment: (id: string) => Promise<void>;
@@ -44,23 +56,18 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
     // Function to create a new payment
     const createPayment = async (payment: Payment) => {
         setLoading(true);
+        const token = getToken();
         try {
-            const response = await fetch('https://localhost:5000/payments/new', {
-                method: 'POST',
+            const response = await axios.post(`https://localhost:5000/payments/new`, payment, {
                 headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payment),
-            });
-            if (!response.ok) {
-                const errorData = await response.json(); // Check for more specific error information from the response body
-                console.log("Error response:", errorData);
-                throw new Error(`Error ${response.status}: ${errorData.message || 'Bad Request'}`);
-            }
-            const responseData = await response.json();
-            console.log('Payment created successfully:', responseData);
+                    Authorization: `Bearer ${token}`,
+                }
+            });        
+            // Handle successful response
+            console.log('Payment created successfully:', response.data);
         } catch (error) {
-            console.error('Error creating payment:', error);
+            const err = error as any;
+            console.error('Error creating payment:', err.response ? err.response.data : err.message);
         } finally {
             setLoading(false);
         }
@@ -120,6 +127,25 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
     };
 
+    const createDeposit = async (values: DepositFunds) => {
+        setLoading(true);
+        const token = getToken();
+        try {
+            const response = await axios.post(`https://localhost:5000/payments/deposit`, values, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });        
+            // Handle successful response
+            console.log('Deposit created successfully:');
+        } catch (error) {
+            const err = error as any;
+            console.error('Error creating payment:', err.response ? err.response.data : err.message);
+        } finally {
+            setLoading(false);
+        }
+      };
+
     // Function to convert currency with hardcoded exchange rates
     const convertCurrency = (amount: number, from: string, to: string): number => {
         const exchangeRates: { [key: string]: number } = {
@@ -139,8 +165,10 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
     };
 
+
+
     return (
-        <PaymentContext.Provider value={{ payments, createPayment, getPaymentById, updatePaymentStatus, deletePayment, convertCurrency, loading }}>
+        <PaymentContext.Provider value={{ payments, createPayment, getPaymentById, updatePaymentStatus, deletePayment, createDeposit, convertCurrency, loading }}>
             {children}
         </PaymentContext.Provider>
     );

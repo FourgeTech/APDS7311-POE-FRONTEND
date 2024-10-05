@@ -13,6 +13,8 @@ import { useNavigate } from "react-router-dom";
 export default function PaymentForm() {
   const [showAlert, setShowAlert] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { createPayment } = usePayment();
 
   interface PaymentFormData {
     customerID: String;
@@ -65,13 +67,9 @@ export default function PaymentForm() {
     }
   };
 
-  const { user } = useAuth();
-  const { createPayment } = usePayment();
-
-
   const formik = useFormik<PaymentFormData>({
     initialValues: {
-      customerID: user?.customerID || "",
+      customerID: "",
       amount: 0,
       currency: "",
       provider: "SWIFT",

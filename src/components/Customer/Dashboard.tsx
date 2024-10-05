@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import DepositFunds from './DepositFunds';
+import DepositFunds from '../Popup/DepositFunds';
 import { useFormik } from 'formik';
+const getToken = () => localStorage.getItem('jwtToken');
+import axios from 'axios';
 import * as yup from 'yup';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -28,8 +30,9 @@ import {
   Eye,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import PaymentForm from "../Payments/PaymentForm";
+import PaymentForm from "./PaymentForm";
 import { Navigate, useNavigate } from "react-router-dom";
+import { isAuthenticated } from "../../services/authService";
 
 interface Transaction {
   _id: string;
@@ -70,6 +73,17 @@ interface TransactionListProps {
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+      if (isAuthenticated() == false) {
+        // Token is expired, handle it
+        logout();
+        navigate("/login"); // Redirect to login page
+      } else {
+        console.log("Token is still valid.");
+      }
+  }, [navigate]);
+
   // Step 1: Add state to track selected sidebar item
   const [activeSection, setActiveSection] = useState<string>("Overview");
   const [showAccountNumber, setShowAccountNumber] = useState(false);
@@ -99,9 +113,15 @@ export default function Dashboard() {
 
   const fetchTransactions = async () => {
     setLoading(true);
+    const token = getToken();
     try {
-      const response = await fetch(`https://localhost:5000/payments/customer/${user?.customerID}`);
-      const data = await response.json();
+      const response = await axios.get(`https://localhost:5000/payments/customer/m`,{
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+      }); 
+      const data = response.data;
+      console.log("payments" + data);
       setTransactions(data);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -112,12 +132,14 @@ export default function Dashboard() {
 
   const loadDatafromAPI = async () => {
     try {
-      const id = user?.customerID;
-      const response = await fetch(
-        "https://localhost:5000/payments/dashboard/" + id
-      );
-      const data = await response.json();
-      console.log(data);
+      const token = getToken();
+      const response = await axios.get(`https://localhost:5000/payments/dashboard/m`,{
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+      }); 
+      const data = await response.data;
+      console.log(data.dashboardData);
 
       // Step 3: Update state variables with the fetched data
       setAccountNumber(data.accountNumber);

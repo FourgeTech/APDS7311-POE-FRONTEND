@@ -5,10 +5,10 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import axios from 'axios';
 
 //Define the User interface
 interface User {
-  customerID: String;
   firstName: String;
   lastName: String;
   username: String;
@@ -103,22 +103,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       // Call your API login function
-      const respone = await fetch("https:localhost:5000/auth/login", {
-        method: "POST",
+      const response = await axios.post("https://localhost:5000/auth/login", {
+        username,
+        accountNumber,
+        password,
+      }, {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          username,
-          accountNumber,
-          password,
-        }),
       });
 
-      if (respone.ok) {
-        const responeData = await respone.json();
+      if (response.status === 200) {
+        // Save token to localStorage or secure HttpOnly cookie
+        localStorage.setItem('jwtToken', response.data.token);
+        const responeData = await response.data;
         const user: User = {
-          customerID: responeData.customerID,
           firstName: responeData.user.firstName,
           lastName: responeData.user.lastName,
           username: responeData.user.username,
@@ -126,10 +125,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         };
         setUser(user); // Set the authenticated user
         localStorage.setItem("user", JSON.stringify(user)); // Store user in local storage
-        console.log(user);
       } else {
         // Handle login error
-        console.log(await respone.json());
+        console.log("Login failed");
       }
     } catch (error) {
       console.error("Login failed", error);
@@ -145,6 +143,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Call your API logout function
       setUser(null); // Clear user on logout
       localStorage.removeItem('user');
+      localStorage.removeItem('jwtToken');
     } catch (error) {
       console.error("Logout failed", error);
     }

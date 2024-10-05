@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from "@/contexts/AuthContext";
+import { usePayment } from "@/contexts/PaymentContext";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 
 import { InferType } from 'yup';
-interface DepositFundsFormValues extends InferType<typeof validationSchema> {}
+
 
 const validationSchema = yup.object({
   amount: yup
@@ -41,10 +42,10 @@ interface DepositFundsProps {
 }
 
 function DepositFunds({ isOpen, setIsOpen }: DepositFundsProps) {
-const { user } = useAuth();
+const { createDeposit } = usePayment();
   const formik = useFormik({
     initialValues: {
-    customerID: user?.customerID,
+    customerID: "user?.customerID",
       amount: 0,
       cardNumber: '',
       expiryDate: '',
@@ -52,7 +53,7 @@ const { user } = useAuth();
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-        register(values);
+        createDeposit(values);
       console.log(values);
       setIsOpen(false);
     },
@@ -127,29 +128,5 @@ const { user } = useAuth();
     </Dialog>
   );
 }
-
-const register = async (values: DepositFundsFormValues) => {
-    try {
-      const response = await fetch("https://localhost:5000/payments/deposit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        
-        console.log("Deposit successful:");
-      } else {
-        console.log(await response.json());
-      }
-    } catch (error) {
-      console.error("Deposit failed:", error);
-      throw error;
-    } finally {
-    }
-  };
 
 export default DepositFunds;
