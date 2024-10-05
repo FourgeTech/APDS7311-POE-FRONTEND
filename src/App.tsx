@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useRef } from "react";
 import BankingLoginForm from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 import PaymentForm from "./components/Customer/PaymentForm";
