@@ -3,11 +3,22 @@ import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PiggyBank, UserPlus } from "lucide-react";
+import { PiggyBank, UserPlus, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext"; // Import useAuth to access register function
+import { useState } from "react";
 
 export default function Register() {
   const { register, loading } = useAuth(); // Access register function and loading state from AuthContext
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
   // Define validation schema using Yup
   const validationSchema = Yup.object({
@@ -232,17 +243,30 @@ export default function Register() {
               <Label htmlFor="password" className="text-sm">
                 Password
               </Label>
-              <Input
-                id="password"
-                placeholder="************"
-                type="password"
-                {...formik.getFieldProps("password")}
-                className={`${
-                  formik.touched.password && formik.errors.password
-                    ? "border-red-500"
-                    : ""
-                }`}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  placeholder="************"
+                  type={showPassword ? "text" : "password"}
+                  {...formik.getFieldProps("password")}
+                  className={`${
+                    formik.touched.password && formik.errors.password
+                      ? "border-red-500"
+                      : ""
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
               {formik.touched.password && formik.errors.password ? (
                 <div className="text-red-500 text-xs mt-1">
                   {formik.errors.password}
@@ -253,17 +277,30 @@ export default function Register() {
               <Label htmlFor="confirm-password" className="text-sm">
                 Confirm Password
               </Label>
-              <Input
-                id="confirm-password"
-                placeholder="************"
-                type="password"
-                {...formik.getFieldProps("confirmPassword")}
-                className={`${
-                  formik.touched.confirmPassword && formik.errors.confirmPassword
-                    ? "border-red-500"
-                    : ""
-                }`}
-              />
+              <div className="relative">
+                <Input
+                  id="confirm-password"
+                  placeholder="************"
+                  type={showConfirmPassword ? "text" : "password"}
+                  {...formik.getFieldProps("confirmPassword")}
+                  className={`${
+                    formik.touched.confirmPassword && formik.errors.confirmPassword
+                      ? "border-red-500"
+                      : ""
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={toggleConfirmPasswordVisibility}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
               {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
                 <div className="text-red-500 text-xs mt-1">
                   {formik.errors.confirmPassword}

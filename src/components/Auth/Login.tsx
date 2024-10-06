@@ -1,15 +1,21 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { LockIcon, CreditCardIcon, PiggyBank } from "lucide-react";
+import { LockIcon, CreditCardIcon, PiggyBank, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const BankingLoginForm = () => {
   const { login, user, loading } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const validationSchema = Yup.object({
     username: Yup.string()
@@ -105,12 +111,25 @@ const BankingLoginForm = () => {
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                {...formik.getFieldProps("password")}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  {...formik.getFieldProps("password")}
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
               {formik.touched.password && formik.errors.password ? (
                 <div className="text-red-500 text-sm mt-1">
                   {formik.errors.password}
