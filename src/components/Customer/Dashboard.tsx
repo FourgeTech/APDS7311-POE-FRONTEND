@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import DepositFunds from '../Popup/DepositFunds';
+import DashboardTransactions from './DashboardTransactions';
 import { useFormik } from 'formik';
 const getToken = () => localStorage.getItem('jwtToken');
 import axios from 'axios';
@@ -36,6 +37,7 @@ import { isAuthenticated } from "../../services/authService";
 
 interface Transaction {
   _id: string;
+  icon?: string
   recipientName: string;
   recipientBank: string;
   paymentAmount: number;
@@ -86,7 +88,6 @@ export default function Dashboard() {
 
   // Step 1: Add state to track selected sidebar item
   const [activeSection, setActiveSection] = useState<string>("Overview");
-  const [showAccountNumber, setShowAccountNumber] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDepositOpen, setIsDepositOpen] = useState(false);
@@ -105,10 +106,6 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Logout error", error);
     }
-  };
-
-  const toggleAccountNumber = () => {
-    setShowAccountNumber(!showAccountNumber);
   };
 
   const fetchTransactions = async () => {
@@ -209,27 +206,6 @@ export default function Dashboard() {
             <h2 className="text-xl font-semibold">
               Welcome back, {user?.firstName}
             </h2>
-            <div className="flex items-center mt-1">
-              <p className="text-sm text-gray-600 mr-2">Account Number: </p>
-              <p className="text-sm font-medium mr-2">
-                {showAccountNumber ? accountNumber : "***********"}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="p-0"
-                onClick={toggleAccountNumber}
-              >
-                {showAccountNumber ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-                <span className="sr-only">
-                  {showAccountNumber ? "Hide" : "Show"} account number
-                </span>
-              </Button>
-            </div>
           </div>
           <Button variant="outline" size="sm" onClick={() => setIsDepositOpen(true)}>
             <CreditCard className="mr-2 h-4 w-4" />
@@ -246,7 +222,8 @@ export default function Dashboard() {
               totalReceived={totalReceived}
             />
           )}
-          {activeSection === "Transactions" && <Transactions transactions={transactions} />}
+          {/* <Transactions transactions={transactions} */}
+          {activeSection === "Transactions" &&  <DashboardTransactions transactions={transactions} accountNumber={accountNumber} accountBalance={availableBalance}/>}
           {activeSection === "Payments" && <Payments />}
           <DepositFunds isOpen={isDepositOpen} setIsOpen={setIsDepositOpen} />
         </div>

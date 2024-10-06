@@ -49,7 +49,7 @@ export default function Register() {
       .matches(/[\W_]/, "Password must contain at least one special character"),
     confirmPassword: Yup.string()
       .required("Confirm Password is required")
-      .oneOf([Yup.ref('password'), null], 'Passwords must match')
+      .oneOf([Yup.ref('password'), ''], 'Passwords must match')
   });
 
   // Initialize Formik

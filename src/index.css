@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+.no-hover-bg:hover {
+  background-color: transparent !important;
+}
 
 @layer base {
   :root {
