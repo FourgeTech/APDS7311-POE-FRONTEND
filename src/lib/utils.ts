@@ -8,11 +8,8 @@ export function cn(...inputs: ClassValue[]) {
 export const maskAccountNumber = (accountNumber: string) => {
   if (!accountNumber) return '';
   
-  // Split the account number by the dashes
-  const parts = accountNumber.split('-');
-  
   // Return masked account number keeping only the last part
-  return `••••••• ${parts[2]}`;
+  return `•••••••••••`;
 };
 
 export const formatCurrency = (amount: number, locale: string = 'en-ZA') => {

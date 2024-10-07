@@ -108,8 +108,8 @@ const DashboardTransactions: React.FC<DashboardTransactionsProps> = ({ transacti
               </Avatar>
               <div>
                 <p className="font-semibold">{transaction.recipientName}</p>
-                <p className={`text-sm ${transaction.paymentAmount > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {transaction.paymentAmount > 0 ? '+' : ''}{transaction.paymentAmount.toFixed(2)}
+                <p className={`text-sm text-red-500`}>
+                  {'- ' + transaction.paymentAmount.toFixed(2)}
                 </p>
               </div>
             </div>
