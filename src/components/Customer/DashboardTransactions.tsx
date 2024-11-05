@@ -118,11 +118,10 @@ const DashboardTransactions: React.FC<DashboardTransactionsProps> = ({ transacti
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500">{transaction.createdAt}</p>
-              <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                transaction.paymentStatus === 'Processing' ? 'bg-blue-100 text-blue-800' :
+              <span className={`inline-block px-2 py-1 text-xs rounded-full ${transaction.paymentStatus === 'Processing' ? 'bg-blue-100 text-blue-800' :
                 transaction.paymentStatus === 'Success' ? 'bg-green-100 text-green-800' :
-                'bg-red-100 text-red-800'
-              }`}>
+                  'bg-red-100 text-red-800'
+                }`}>
                 {transaction.paymentStatus}
               </span>
             </div>
