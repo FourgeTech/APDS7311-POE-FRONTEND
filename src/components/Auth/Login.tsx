@@ -7,17 +7,19 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const BankingLoginForm = () => {
   const { login, user, loading } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [loginType, setLoginType] = useState("customer");
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const validationSchema = Yup.object({
+  const customerValidationSchema = Yup.object({
     username: Yup.string()
       .required("Username is required")
       .min(3, "Username must be at least 3 characters")
@@ -35,16 +37,35 @@ const BankingLoginForm = () => {
       .matches(/^\d{11}$/, "Account number must be exactly 11 digits long"),
   });
 
+  const employeeValidationSchema = Yup.object({
+    username: Yup.string()
+      .required("Username is required")
+      .min(3, "Username must be at least 3 characters")
+      .max(15, "Username must not exceed 15 characters")
+      .matches(/^\S*$/, "Username cannot contain spaces"),
+    password: Yup.string()
+      .required("Password is required")
+      .min(8, "Password must be at least 8 characters")
+      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+      .matches(/[0-9]/, "Password must contain at least one number")
+      .matches(/[\W_]/, "Password must contain at least one special character"),
+  });
+
   const formik = useFormik({
     initialValues: {
       username: "",
       password: "",
       accountNumber: "",
     },
-    validationSchema,
+    validationSchema: loginType === "customer" ? customerValidationSchema : employeeValidationSchema,
     onSubmit: async (values) => {
       try {
-        await login(values.username, values.accountNumber, values.password);
+        if (loginType === "customer") {
+          await login(values.username, values.accountNumber, values.password);
+        } else {
+          await login(values.username, "", values.password);
+        }
       } catch (error) {
         console.error("Login failed:", error);
       } finally {
@@ -80,84 +101,149 @@ const BankingLoginForm = () => {
               Please enter your details to access your account
             </p>
           </div>
-          <form className="space-y-3" onSubmit={formik.handleSubmit}>
-            <div>
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Enter your username"
-                {...formik.getFieldProps("username")}
-              />
-              {formik.touched.username && formik.errors.username ? (
-                <div className="text-red-500 text-sm mt-1">
-                  {formik.errors.username}
+          <Tabs defaultValue="customer" onValueChange={(value) => setLoginType(value)}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="customer">Customer</TabsTrigger>
+              <TabsTrigger value="employee">Employee</TabsTrigger>
+            </TabsList>
+            <TabsContent value="customer">
+              <form className="space-y-3" onSubmit={formik.handleSubmit}>
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Enter your username"
+                    {...formik.getFieldProps("username")}
+                  />
+                  {formik.touched.username && formik.errors.username ? (
+                    <div className="text-red-500 text-sm mt-1">
+                      {formik.errors.username}
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
-            </div>
-            <div>
-              <Label htmlFor="account-number">Account Number</Label>
-              <Input
-                id="account-number"
-                type="text"
-                placeholder="Enter your account number"
-                {...formik.getFieldProps("accountNumber")}
-              />
-              {formik.touched.accountNumber && formik.errors.accountNumber ? (
-                <div className="text-red-500 text-sm mt-1">
-                  {formik.errors.accountNumber}
+                <div>
+                  <Label htmlFor="account-number">Account Number</Label>
+                  <Input
+                    id="account-number"
+                    type="text"
+                    placeholder="Enter your account number"
+                    {...formik.getFieldProps("accountNumber")}
+                  />
+                  {formik.touched.accountNumber && formik.errors.accountNumber ? (
+                    <div className="text-red-500 text-sm mt-1">
+                      {formik.errors.accountNumber}
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  {...formik.getFieldProps("password")}
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-              {formik.touched.password && formik.errors.password ? (
-                <div className="text-red-500 text-sm mt-1">
-                  {formik.errors.password}
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      {...formik.getFieldProps("password")}
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                  {formik.touched.password && formik.errors.password ? (
+                    <div className="text-red-500 text-sm mt-1">
+                      {formik.errors.password}
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
-            </div>
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-4 w-4 text-blue-600"
-                />
-                <span className="ml-2 text-sm text-gray-600">Remember me</span>
-              </label>
-              <a href="#" className="text-sm text-blue-600 hover:underline">
-                Forgot password?
-              </a>
-            </div>
-            <Button type="submit" className="w-full">
-              {loading ? "Logging in..." : "Log In"}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm text-gray-600">
-            Don't have an account?{" "}
-            <a href="/register" className="text-blue-600 hover:underline">
-              Sign up
-            </a>
-          </p>
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox h-4 w-4 text-blue-600"
+                    />
+                    <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                  </label>
+                  <a href="#" className="text-sm text-blue-600 hover:underline">
+                    Forgot password?
+                  </a>
+                </div>
+                <Button type="submit" className="w-full">
+                  {loading ? "Logging in..." : "Log In"}
+                </Button>
+              </form>
+              <p className="mt-4 text-center text-sm text-gray-600">
+                Don't have an account?{" "}
+                <a href="/register" className="text-blue-600 hover:underline">
+                  Sign up
+                </a>
+              </p>
+            </TabsContent>
+            <TabsContent value="employee">
+              <form className="space-y-3" onSubmit={formik.handleSubmit}>
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Enter your username"
+                    {...formik.getFieldProps("username")}
+                  />
+                  {formik.touched.username && formik.errors.username ? (
+                    <div className="text-red-500 text-sm mt-1">
+                      {formik.errors.username}
+                    </div>
+                  ) : null}
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      {...formik.getFieldProps("password")}
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                  {formik.touched.password && formik.errors.password ? (
+                    <div className="text-red-500 text-sm mt-1">
+                      {formik.errors.password}
+                    </div>
+                  ) : null}
+                </div>
+                <div className="flex items-center">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox h-4 w-4 text-blue-600"
+                    />
+                    <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                  </label>
+                </div>
+                <Button type="submit" className="w-full">
+                  {loading ? "Logging in..." : "Log In"}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
