@@ -1,24 +1,27 @@
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import { LockIcon, CreditCardIcon, PiggyBank, Eye, EyeOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+'use client'
+
+import { useFormik } from "formik"
+import * as Yup from "yup"
+import { motion, AnimatePresence } from "framer-motion"
+import { LockIcon, CreditCardIcon, PiggyBank, Eye, EyeOff } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useAuth } from "@/contexts/AuthContext"
+import { useNavigate } from "react-router-dom"
+import { useState } from "react"
 
 const BankingLoginForm = () => {
-  const { login, user, loading } = useAuth();
-  const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginType, setLoginType] = useState("customer");
+  const { login, user, loading } = useAuth()
+  const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false)
+  const [loginType, setLoginType] = useState("customer")
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+    setShowPassword(!showPassword)
+  }
 
+  // Validation schemas remain the same
   const customerValidationSchema = Yup.object({
     username: Yup.string()
       .required("Username is required")
@@ -35,7 +38,7 @@ const BankingLoginForm = () => {
     accountNumber: Yup.string()
       .required("Account number is required")
       .matches(/^\d{11}$/, "Account number must be exactly 11 digits long"),
-  });
+  })
 
   const employeeValidationSchema = Yup.object({
     username: Yup.string()
@@ -50,7 +53,7 @@ const BankingLoginForm = () => {
       .matches(/[a-z]/, "Password must contain at least one lowercase letter")
       .matches(/[0-9]/, "Password must contain at least one number")
       .matches(/[\W_]/, "Password must contain at least one special character"),
-  });
+  })
 
   const formik = useFormik({
     initialValues: {
@@ -62,192 +65,216 @@ const BankingLoginForm = () => {
     onSubmit: async (values) => {
       try {
         if (loginType === "customer") {
-          await login(values.username, values.accountNumber, values.password);
+          await login(values.username, values.accountNumber, values.password)
         } else {
-          await login(values.username, "", values.password);
+          await login(values.username, "", values.password)
         }
       } catch (error) {
-        console.error("Login failed:", error);
+        console.error("Login failed:", error)
       } finally {
-        formik.resetForm();
-        navigate("/dashboard");
+        formik.resetForm()
+        navigate("/dashboard")
       }
     },
-  });
+  })
 
   return (
     <div className="flex min-h-screen">
-      <div className="flex-1 bg-black p-8 flex flex-col justify-between">
-        <div className="flex items-center space-x-4">
-          <PiggyBank className="h-16 w-16 text-white" />
-          <h1 className="text-5xl font-bold text-blue-600">by Fourge Tech</h1>
+      <motion.div
+        initial={false}
+        animate={{
+          width: "50%",
+          x: loginType === "customer" ? "0%" : "100%",
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="bg-black flex items-center justify-center fixed top-0 bottom-0"
+      >
+        <div className="text-center">
+          <PiggyBank className="h-16 w-16 text-white mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-white">Fourge Bank</h1>
         </div>
-        <div className="text-white">
-          <p className="text-base font-semibold mb-2">
-            "Connecting you to the world with secure, seamless international
-            payments."
-          </p>
-          <p className="text-sm text-blue-600">-Dizmo Beast (CEO)</p>
-        </div>
+      </motion.div>
+
+      <div className="w-full min-h-screen flex">
+        <AnimatePresence mode="wait">
+          {loginType === "customer" ? (
+            <motion.div
+              key="customer"
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="w-1/2 ml-auto p-8 flex items-center justify-center"
+            >
+              <div className="w-full max-w-md space-y-6">
+                <h2 className="text-2xl font-bold">Customer Login</h2>
+                <form className="space-y-3" onSubmit={formik.handleSubmit}>
+                  <div>
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="Enter your username"
+                      {...formik.getFieldProps("username")}
+                    />
+                    {formik.touched.username && formik.errors.username ? (
+                      <div className="text-red-500 text-sm mt-1">
+                        {formik.errors.username}
+                      </div>
+                    ) : null}
+                  </div>
+                  <div>
+                    <Label htmlFor="account-number">Account Number</Label>
+                    <Input
+                      id="account-number"
+                      type="text"
+                      placeholder="Enter your account number"
+                      {...formik.getFieldProps("accountNumber")}
+                    />
+                    {formik.touched.accountNumber && formik.errors.accountNumber ? (
+                      <div className="text-red-500 text-sm mt-1">
+                        {formik.errors.accountNumber}
+                      </div>
+                    ) : null}
+                  </div>
+                  <div>
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        {...formik.getFieldProps("password")}
+                      />
+                      <button
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                    {formik.touched.password && formik.errors.password ? (
+                      <div className="text-red-500 text-sm mt-1">
+                        {formik.errors.password}
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        className="form-checkbox h-4 w-4 text-blue-600"
+                      />
+                      <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                    </label>
+                    <a href="#" className="text-sm text-blue-600 hover:underline">
+                      Forgot password?
+                    </a>
+                  </div>
+                  <Button type="submit" className="w-full">
+                    {loading ? "Logging in..." : "Log In"}
+                  </Button>
+                </form>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="employee"
+              initial={{ opacity: 0, x: -100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 100 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="w-1/2 p-8 flex items-center justify-center"
+            >
+              <div className="w-full max-w-md space-y-6">
+                <h2 className="text-2xl font-bold">Employee Login</h2>
+                <form className="space-y-3" onSubmit={formik.handleSubmit}>
+                  <div>
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="Enter your username"
+                      {...formik.getFieldProps("username")}
+                    />
+                    {formik.touched.username && formik.errors.username ? (
+                      <div className="text-red-500 text-sm mt-1">
+                        {formik.errors.username}
+                      </div>
+                    ) : null}
+                  </div>
+                  <div>
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        {...formik.getFieldProps("password")}
+                      />
+                      <button
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                    {formik.touched.password && formik.errors.password ? (
+                      <div className="text-red-500 text-sm mt-1">
+                        {formik.errors.password}
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        className="form-checkbox h-4 w-4 text-blue-600"
+                      />
+                      <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                    </label>
+                  </div>
+                  <Button type="submit" className="w-full">
+                    {loading ? "Logging in..." : "Log In"}
+                  </Button>
+                </form>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      <div className="flex-1 p-6 flex items-center justify-center">
-        <div className="w-full max-w-md space-y-4">
-          <div className="space-y-1 text-center">
-            <div className="flex justify-center">
-              <CreditCardIcon className="h-14 w-14 text-blue-600" />
-            </div>
-            <h2 className="text-2xl font-bold">Welcome to FourgeBank</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
-              Please enter your details to access your account
-            </p>
-          </div>
-          <Tabs defaultValue="customer" onValueChange={(value) => setLoginType(value)}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="customer">Customer</TabsTrigger>
-              <TabsTrigger value="employee">Employee</TabsTrigger>
-            </TabsList>
-            <TabsContent value="customer">
-              <form className="space-y-3" onSubmit={formik.handleSubmit}>
-                <div>
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder="Enter your username"
-                    {...formik.getFieldProps("username")}
-                  />
-                  {formik.touched.username && formik.errors.username ? (
-                    <div className="text-red-500 text-sm mt-1">
-                      {formik.errors.username}
-                    </div>
-                  ) : null}
-                </div>
-                <div>
-                  <Label htmlFor="account-number">Account Number</Label>
-                  <Input
-                    id="account-number"
-                    type="text"
-                    placeholder="Enter your account number"
-                    {...formik.getFieldProps("accountNumber")}
-                  />
-                  {formik.touched.accountNumber && formik.errors.accountNumber ? (
-                    <div className="text-red-500 text-sm mt-1">
-                      {formik.errors.accountNumber}
-                    </div>
-                  ) : null}
-                </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      {...formik.getFieldProps("password")}
-                    />
-                    <button
-                      type="button"
-                      onClick={togglePasswordVisibility}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                  {formik.touched.password && formik.errors.password ? (
-                    <div className="text-red-500 text-sm mt-1">
-                      {formik.errors.password}
-                    </div>
-                  ) : null}
-                </div>
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox h-4 w-4 text-blue-600"
-                    />
-                    <span className="ml-2 text-sm text-gray-600">Remember me</span>
-                  </label>
-                  <a href="#" className="text-sm text-blue-600 hover:underline">
-                    Forgot password?
-                  </a>
-                </div>
-                <Button type="submit" className="w-full">
-                  {loading ? "Logging in..." : "Log In"}
-                </Button>
-              </form>
-              <p className="mt-4 text-center text-sm text-gray-600">
-                Don't have an account?{" "}
-                <a href="/register" className="text-blue-600 hover:underline">
-                  Sign up
-                </a>
-              </p>
-            </TabsContent>
-            <TabsContent value="employee">
-              <form className="space-y-3" onSubmit={formik.handleSubmit}>
-                <div>
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder="Enter your username"
-                    {...formik.getFieldProps("username")}
-                  />
-                  {formik.touched.username && formik.errors.username ? (
-                    <div className="text-red-500 text-sm mt-1">
-                      {formik.errors.username}
-                    </div>
-                  ) : null}
-                </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      {...formik.getFieldProps("password")}
-                    />
-                    <button
-                      type="button"
-                      onClick={togglePasswordVisibility}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                  {formik.touched.password && formik.errors.password ? (
-                    <div className="text-red-500 text-sm mt-1">
-                      {formik.errors.password}
-                    </div>
-                  ) : null}
-                </div>
-                <div className="flex items-center">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox h-4 w-4 text-blue-600"
-                    />
-                    <span className="ml-2 text-sm text-gray-600">Remember me</span>
-                  </label>
-                </div>
-                <Button type="submit" className="w-full">
-                  {loading ? "Logging in..." : "Log In"}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+
+      {/* Login type switcher */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20">
+        <div className="bg-white rounded-full shadow-lg p-1">
+          <Button
+            variant="ghost"
+            className={`rounded-full px-6 ${loginType === "employee" ? "bg-primary text-primary-foreground" : ""}`}
+            onClick={() => setLoginType("employee")}
+          >
+            Employee
+          </Button>
+          <Button
+            variant="ghost"
+            className={`rounded-full px-6 ${loginType === "customer" ? "bg-primary text-primary-foreground" : ""}`}
+            onClick={() => setLoginType("customer")}
+          >
+            Customer
+          </Button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default BankingLoginForm;
+export default BankingLoginForm
