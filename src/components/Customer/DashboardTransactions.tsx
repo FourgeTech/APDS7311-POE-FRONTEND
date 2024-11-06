@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, Circle, CircleDollarSign, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -69,13 +69,15 @@ const DashboardTransactions: React.FC<DashboardTransactionsProps> = ({ transacti
   const currentTransactions = sortedTransactions.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
-    <div className="container mx-auto p-4 max-w-full">
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-6">
+      <div className="flex items-center space-x-4">
+        <CircleDollarSign className="h-12 w-12 text-blue-500" />
         <div>
-          <h1 className="text-2xl font-bold">Transaction History</h1>
-          <p className="text-sm text-gray-500">Gain Insights and Track Your Transactions Over Time</p>
-        </div>
-        
+          <h1 className="text-2xl font-semibold">Transaction History</h1>
+          <p className="text-sm text-gray-500">
+            Gain Insights and Track Your Transactions Over Time
+          </p>
+        </div>       
       </div>
 
       <Card className="bg-blue-500 text-white p-6 mb-6">
@@ -150,7 +152,7 @@ const DashboardTransactions: React.FC<DashboardTransactionsProps> = ({ transacti
             <div className="text-right">
               <p className="text-sm text-gray-500">{format(new Date(transaction.createdAt), 'PPpp')}</p>
               <span className={`inline-block px-2 py-1 text-xs rounded-full ${transaction.paymentStatus === 'Processing' ? 'bg-blue-100 text-blue-800' :
-                transaction.paymentStatus === 'Pending' ? 'bg-yellow-600 text-white' :
+                transaction.paymentStatus === 'Pending' ? 'bg-orange-500 text-white' :
                 transaction.paymentStatus === 'Approved' ? 'bg-green-600 text-white' :
                 'bg-red-600 text-white'
                 }`}>
