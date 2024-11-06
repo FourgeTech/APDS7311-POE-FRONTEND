@@ -7,12 +7,12 @@ import {
 } from "react";
 import axios from 'axios';
 
-//Define the User interface
+// Define the User interface
 interface User {
-  firstName: String;
-  lastName: String;
-  username: String;
-  email: String;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
 }
 
 interface RegisterValues {
@@ -25,20 +25,21 @@ interface RegisterValues {
   password: string;
 }
 
-//Define the AuthContextType interface
+// Define the AuthContextType interface
 interface AuthContextType {
   user: User | null;
   login: (
     username: string,
     accountNumber: string,
-    password: string
+    password: string,
+    loginType: string
   ) => Promise<void>;
   register: (values: RegisterValues) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
 }
 
-//Create a default value for AuthContext
+// Create a default value for AuthContext
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Create a hook to allow components to access the AuthContext
@@ -98,12 +99,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (
     username: string,
     accountNumber: string,
-    password: string
+    password: string,
+    loginType: string
   ) => {
     setLoading(true);
     try {
-      // Call your API login function
-      const response = await axios.post("https://localhost:5000/auth/login", {
+      const endpoint = loginType === "customer" ? "customer/login" : "employee/login";
+      const response = await axios.post(`https://localhost:5000/auth/${endpoint}`, {
         username,
         accountNumber,
         password,
@@ -114,19 +116,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (response.status === 200) {
-        // Save token to localStorage or secure HttpOnly cookie
         localStorage.setItem('jwtToken', response.data.token);
-        const responeData = await response.data;
+        const responseData = await response.data;
         const user: User = {
-          firstName: responeData.user.firstName,
-          lastName: responeData.user.lastName,
-          username: responeData.user.username,
-          email: responeData.user.email,
+          firstName: responseData.user.firstName,
+          lastName: responseData.user.lastName,
+          username: responseData.user.username,
+          email: responseData.user.email,
         };
         setUser(user); // Set the authenticated user
         localStorage.setItem("user", JSON.stringify(user)); // Store user in local storage
       } else {
-        // Handle login error
         console.log("Login failed");
       }
     } catch (error) {
@@ -140,7 +140,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Function to handle logout
   const logout = async () => {
     try {
-      // Call your API logout function
       setUser(null); // Clear user on logout
       localStorage.removeItem('user');
       localStorage.removeItem('jwtToken');
