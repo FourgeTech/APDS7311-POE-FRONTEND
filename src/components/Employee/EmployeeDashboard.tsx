@@ -1,21 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import DepositFunds from '../Popup/DepositFunds';
-import DashboardTransactions from '../Customer/DashboardTransactions';
-import { useFormik } from 'formik';
 const getToken = () => localStorage.getItem('jwtToken');
 import axios from 'axios';
 import * as yup from 'yup';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   CreditCard,
@@ -31,9 +18,9 @@ import {
   Eye,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import PaymentForm from "../Customer/PaymentForm";
 import { Navigate, useNavigate } from "react-router-dom";
 import { isAuthenticated } from "../../services/authService";
+import TransactionVerification from "./TransactionVerification";
 
 interface Transaction {
   _id: string;
@@ -77,27 +64,23 @@ export default function EmployeeDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-      if (isAuthenticated() == false) {
-        // Token is expired, handle it
-        logout();
-        navigate("/login"); // Redirect to login page
-      } else {
-        console.log("Token is still valid.");
-      }
+    if (isAuthenticated() == false) {
+      // Token is expired, handle it
+      logout();
+      navigate("/login"); // Redirect to login page
+    } else {
+      console.log("Token is still valid.");
+    }
   }, [navigate]);
 
   // Step 1: Add state to track selected sidebar item
   const [activeSection, setActiveSection] = useState<string>("Overview");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [isDepositOpen, setIsDepositOpen] = useState(false);
 
   // Step 2: Add state variables to store API data
   const [accountNumber, setAccountNumber] = useState<string>("");
   const [availableBalance, setAvailableBalance] = useState<number>(0);
-  const [latestBalance, setLatestBalance] = useState<number>(0);
-  const [totalSent, setTotalSent] = useState<number>(0);
-  const [totalReceived, setTotalReceived] = useState<number>(0);
 
   const handleLogout = async () => {
     try {
@@ -112,11 +95,11 @@ export default function EmployeeDashboard() {
     setLoading(true);
     const token = getToken();
     try {
-      const response = await axios.get(`https://localhost:5000/payments/employee/m`,{
+      const response = await axios.get(`https://localhost:5000/payments/employee/m`, {
         headers: {
-            Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         }
-      }); 
+      });
       const data = response.data;
       console.log("payments" + data);
       setTransactions(data);
@@ -130,20 +113,17 @@ export default function EmployeeDashboard() {
   const loadDatafromAPI = async () => {
     try {
       const token = getToken();
-      const response = await axios.get(`https://localhost:5000/payments/dashboard/employee`,{
+      const response = await axios.get(`https://localhost:5000/payments/dashboard/employee`, {
         headers: {
-            Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         }
-      }); 
+      });
       const data = await response.data;
       console.log(data.dashboardData);
 
       // Step 3: Update state variables with the fetched data
       setAccountNumber(data.accountNumber);
       setAvailableBalance(data.availableBalance);
-      setLatestBalance(data.latestBalance);
-      setTotalSent(data.totalSent);
-      setTotalReceived(data.totalReceived);
     } catch (error) {
       console.error("Error fetching data", error);
     }
@@ -173,18 +153,6 @@ export default function EmployeeDashboard() {
               <MenuIcon className="mr-2 h-4 w-4" />
               Overview
             </Button>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => setActiveSection("Transactions")}
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              Transactions
-            </Button>
-            <Button variant="ghost" onClick={() => navigate("/payment")}>
-              <RefreshCcw className="mr-2 h-4 w-4" />
-              Payments
-            </Button>
           </nav>
         </ScrollArea>
         <div className="p-6">
@@ -207,141 +175,14 @@ export default function EmployeeDashboard() {
               Welcome back, {user?.firstName}
             </h2>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setIsDepositOpen(true)}>
-            <CreditCard className="mr-2 h-4 w-4" />
-            Deposit Funds
-          </Button>
         </header>
 
         <div className="p-6 space-y-6 overflow-y-auto h-[calc(100vh-5rem)]">
           {activeSection === "Overview" && (
-            <Overview
-              availableBalance={availableBalance}
-              latestBalance={latestBalance}
-              totalSent={totalSent}
-              totalReceived={totalReceived}
-            />
+            <TransactionVerification transactions={transactions} accountNumber={accountNumber} accountBalance={availableBalance} />
           )}
-          {activeSection === "Transactions" &&  <DashboardTransactions transactions={transactions} accountNumber={accountNumber} accountBalance={availableBalance}/>}
-          {activeSection === "Payments" && <Payments />}
-          <DepositFunds isOpen={isDepositOpen} setIsOpen={setIsDepositOpen} />
         </div>
       </main>
     </div>
   );
-}
-
-interface OverviewProps {
-  availableBalance: number; // Adjust the type as necessary
-  latestBalance: number; // Adjust the type as necessary
-  totalSent: number; // Adjust the type as necessary
-  totalReceived: number; // Adjust the type as necessary
-}
-
-function Overview({
-  availableBalance,
-  latestBalance,
-  totalSent,
-  totalReceived,
-}: OverviewProps) {
-  return (
-    <div className="space-y-6">
-      <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Available Balance
-            </CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              R{availableBalance.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground">Updated just now</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Latest Balance
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              R{latestBalance.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground">Updated just now</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Sent</CardTitle>
-            <ArrowUpIcon className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">R{totalSent.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Updated just now</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Received
-            </CardTitle>
-            <ArrowDownIcon className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              R{totalReceived.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground">Updated just now</p>
-          </CardContent>
-        </Card>
-      </section>
-    </div>
-  );
-}
-
-function Transactions({ transactions }: TransactionListProps) {
-  return (
-    <section>
-      <h3 className="text-lg font-semibold mb-4">Recent Transactions</h3>
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Recipient Name</TableHead>
-                <TableHead>Recipient Bank</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead>Provider</TableHead>
-                <TableHead>Recipient Account Number</TableHead>
-                <TableHead className="text-right">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.map((transaction) => (
-                <TableRow key={transaction._id}>
-                  <TableCell>{new Date(transaction.createdAt).toLocaleDateString()}</TableCell>
-                  <TableCell>{transaction.recipientName}</TableCell>
-                  <TableCell>{transaction.recipientBank}</TableCell>
-                  <TableCell className="text-right">R{transaction.paymentAmount.toFixed(2)}</TableCell>
-                  <TableCell>{transaction.provider}</TableCell>
-                  <TableCell>{transaction.payeeAccountNumber}</TableCell>
-                  <TableCell className="text-right">{transaction.paymentStatus}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </section>
-  );
-}
-
-function Payments() {
-  return <PaymentForm />;
 }
