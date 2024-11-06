@@ -12,7 +12,8 @@ import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 
 const BankingLoginForm = () => {
-  const { login, user, loading } = useAuth()
+  const { login, user } = useAuth()
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [loginType, setLoginType] = useState("customer")
@@ -63,20 +64,23 @@ const BankingLoginForm = () => {
     },
     validationSchema: loginType === "customer" ? customerValidationSchema : employeeValidationSchema,
     onSubmit: async (values) => {
+      setLoading(true);
       try {
         if (loginType === "customer") {
-          await login(values.username, values.accountNumber, values.password)
+          await login(values.username, values.accountNumber, values.password, loginType);
+          navigate("/dashboard");
         } else {
-          await login(values.username, "", values.password)
+          await login(values.username, "", values.password, loginType);
+          navigate("/employee-dashboard");
         }
       } catch (error) {
-        console.error("Login failed:", error)
+        console.error("Login failed:", error);
       } finally {
-        formik.resetForm()
-        navigate("/dashboard")
+        setLoading(false);
+        formik.resetForm();
       }
     },
-  })
+  });
 
   return (
     <div className="flex min-h-screen">
