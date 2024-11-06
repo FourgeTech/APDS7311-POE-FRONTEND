@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/contexts/AuthContext"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import { useState } from "react"
 
 const BankingLoginForm = () => {
@@ -22,7 +22,6 @@ const BankingLoginForm = () => {
     setShowPassword(!showPassword)
   }
 
-  // Validation schemas remain the same
   const customerValidationSchema = Yup.object({
     username: Yup.string()
       .required("Username is required")
@@ -91,11 +90,14 @@ const BankingLoginForm = () => {
           x: loginType === "customer" ? "0%" : "100%",
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="bg-black flex items-center justify-center fixed top-0 bottom-0"
+        className="bg-gradient-to-br from-primary to-primary-dark flex flex-col items-center justify-center fixed top-0 bottom-0"
       >
-        <div className="text-center">
-          <PiggyBank className="h-16 w-16 text-white mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white">Fourge Bank</h1>
+        <div className="text-center space-y-6">
+          <PiggyBank className="h-24 w-24 text-white mx-auto" />
+          <h1 className="text-4xl font-bold text-white">Fourge Bank</h1>
+          <p className="text-xl text-white font-light max-w-md mx-auto">
+            "Empowering your financial journey, one secure login at a time."
+          </p>
         </div>
       </motion.div>
 
@@ -184,6 +186,14 @@ const BankingLoginForm = () => {
                     {loading ? "Logging in..." : "Log In"}
                   </Button>
                 </form>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">
+                    Don't have an account?{" "}
+                    <Link to="/register" className="text-blue-600 hover:underline">
+                      Sign up here
+                    </Link>
+                  </p>
+                </div>
               </div>
             </motion.div>
           ) : (
