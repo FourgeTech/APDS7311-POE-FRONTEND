@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-const getToken = () => localStorage.getItem('jwtToken');
 import axios from 'axios';
 import * as yup from 'yup';
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,9 +21,11 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { isAuthenticated } from "../../services/authService";
 import TransactionVerification from "./TransactionVerification";
 
+const getToken = () => localStorage.getItem('jwtToken');
+
 interface Transaction {
   _id: string;
-  icon?: string
+  icon?: string;
   recipientName: string;
   recipientBank: string;
   paymentAmount: number;
@@ -33,30 +34,9 @@ interface Transaction {
   payeeAccountNumber: string;
   paymentStatus: string;
   createdAt: string;
-}
-
-const validationSchema = yup.object({
-  amount: yup
-    .number()
-    .typeError('Amount must be a number')
-    .positive('Amount must be a positive number')
-    .required('Amount is required'),
-  cardNumber: yup
-    .string()
-    .matches(/^\d{16}$/, 'Card number must be 16 digits long')
-    .required('Card number is required'),
-  expiryDate: yup
-    .string()
-    .matches(/^(0[1-9]|1[0-2])\/?([0-9]{4}|[0-9]{2})$/, 'Invalid expiry date format')
-    .required('Expiry date is required'),
-  cvv: yup
-    .string()
-    .matches(/^\d{3,4}$/, 'CVV must be 3 or 4 digits long')
-    .required('CVV is required'),
-});
-
-interface TransactionListProps {
-  transactions: Transaction[];
+  swiftCode: string;
+  verifiedAt: string;
+  verifiedBy: string;
 }
 
 export default function EmployeeDashboard() {
@@ -95,13 +75,13 @@ export default function EmployeeDashboard() {
     setLoading(true);
     const token = getToken();
     try {
-      const response = await axios.get(`https://localhost:5000/payments/employee/m`, {
+      const response = await axios.get(`https://localhost:5000/payments/all`, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
       });
       const data = response.data;
-      console.log("payments" + data);
+      console.log("Payments:", data);
       setTransactions(data);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -110,31 +90,13 @@ export default function EmployeeDashboard() {
     }
   };
 
-  const loadDatafromAPI = async () => {
-    try {
-      const token = getToken();
-      const response = await axios.get(`https://localhost:5000/payments/dashboard/employee`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
-      const data = await response.data;
-      console.log(data.dashboardData);
-
-      // Step 3: Update state variables with the fetched data
-      setAccountNumber(data.accountNumber);
-      setAvailableBalance(data.availableBalance);
-    } catch (error) {
-      console.error("Error fetching data", error);
-    }
-  };
-
-  // Step 4: Call loadDatafromAPI when the component mounts
   useEffect(() => {
-    loadDatafromAPI();
     fetchTransactions();
-  }, []); // Empty dependency array ensures this runs only once when the component mounts
+  }, []); 
 
+  useEffect(() => {
+    console.log("Transactions:", transactions);
+  }, [transactions]);
   // Step 5: Sidebar buttons now change the active section
   return (
     <div className="flex h-screen bg-gray-50">
@@ -179,10 +141,13 @@ export default function EmployeeDashboard() {
 
         <div className="p-6 space-y-6 overflow-y-auto h-[calc(100vh-5rem)]">
           {activeSection === "Overview" && (
-            <TransactionVerification transactions={transactions} accountNumber={accountNumber} accountBalance={availableBalance} />
+                  <TransactionVerification transactions={transactions} accountNumber="1234567890" accountBalance={10000} />
+
           )}
         </div>
       </main>
     </div>
   );
+  
 }
+
