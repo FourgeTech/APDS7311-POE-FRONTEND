@@ -116,9 +116,19 @@ export default function Component({ isOpen, setIsOpen }: DepositFundsProps) {
                   <Input
                     id="amount"
                     name="amount"
-                    type="text"
+                    type="number"
                     placeholder="0.00"
+                    min={1}
                     className="pl-7"
+                    pattern="[0-9]*"
+                    onKeyPress={(e) => {
+                      if (!/[0-9]/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    onInput={(e) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '');
+                    }}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     value={formik.values.amount}

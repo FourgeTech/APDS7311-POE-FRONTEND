@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import DepositFunds from '../Popup/DepositFunds';
 import DashboardTransactions from './DashboardTransactions';
-import { CircleDollarSign, PiggyBank } from 'lucide-react'
+import { ArrowDown, ArrowUp, Banknote, CircleDollarSign, PiggyBank } from 'lucide-react'
 import { useFormik } from 'formik';
 const getToken = () => localStorage.getItem('jwtToken');
 import axios from 'axios';
@@ -78,13 +78,13 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-      if (isAuthenticated() == false) {
-        // Token is expired, handle it
-        logout();
-        navigate("/login"); // Redirect to login page
-      } else {
-        console.log("Token is still valid.");
-      }
+    if (isAuthenticated() == false) {
+      // Token is expired, handle it
+      logout();
+      navigate("/login"); // Redirect to login page
+    } else {
+      console.log("Token is still valid.");
+    }
   }, [navigate]);
 
   // Step 1: Add state to track selected sidebar item
@@ -113,11 +113,11 @@ export default function Dashboard() {
     setLoading(true);
     const token = getToken();
     try {
-      const response = await axios.get(`https://localhost:5000/payments/customer/m`,{
+      const response = await axios.get(`https://localhost:5000/payments/customer/m`, {
         headers: {
-            Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         }
-      }); 
+      });
       const data = response.data;
       console.log("payments" + data);
       setTransactions(data);
@@ -131,11 +131,11 @@ export default function Dashboard() {
   const loadDatafromAPI = async () => {
     try {
       const token = getToken();
-      const response = await axios.get(`https://localhost:5000/payments/dashboard/m`,{
+      const response = await axios.get(`https://localhost:5000/payments/dashboard/m`, {
         headers: {
-            Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         }
-      }); 
+      });
       const data = await response.data;
       console.log(data.dashboardData);
 
@@ -183,8 +183,8 @@ export default function Dashboard() {
               Transactions
             </Button>
             <Button variant="ghost" onClick={() => navigate("/payment")}>
-              <RefreshCcw className="mr-2 h-4 w-4" />
-              Payments
+              <Banknote className="mr-2 h-4 w-4" />
+              New Payment
             </Button>
           </nav>
         </ScrollArea>
@@ -224,7 +224,7 @@ export default function Dashboard() {
             />
           )}
           {/* <Transactions transactions={transactions} */}
-          {activeSection === "Transactions" &&  <DashboardTransactions transactions={transactions} accountNumber={accountNumber} accountBalance={availableBalance}/>}
+          {activeSection === "Transactions" && <DashboardTransactions transactions={transactions} accountNumber={accountNumber} accountBalance={availableBalance} />}
           {activeSection === "Payments" && <Payments />}
           <DepositFunds isOpen={isDepositOpen} setIsOpen={setIsDepositOpen} />
         </div>
@@ -246,76 +246,78 @@ function Overview({
   totalReceived,
 }: OverviewProps) {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <PiggyBank className="h-12 w-12 text-blue-500" />
+    <div className="space-y-6 bg-gray-100 p-6 rounded-lg">
+      <div className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-sm">
+        <PiggyBank className="h-12 w-12 text-blue-600" />
         <div>
-          <h2 className="text-2xl font-semibold">Account Overview</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">Account Overview</h2>
           <p className="text-sm text-gray-500">
             View a Summary of Your Account at a Quick Glance
           </p>
         </div>
       </div>
-      <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-        <Card>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-2xl font-medium">
               Available Balance
             </CardTitle>
-            <Wallet className="h-8 w-8 text-muted-foreground" />
+            <Wallet className="h-8 w-8 text-blue-200" />
           </CardHeader>
           <CardContent>
             <div className="text-5xl font-bold">
               R{availableBalance.toFixed(2)}
             </div>
-            <p className="text-xl text-muted-foreground">Updated just now</p>
+            <p className="text-lg text-blue-200 mt-2">Updated just now</p>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className="bg-white border-2 border-blue-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-2xl font-medium">
+            <CardTitle className="text-2xl font-medium text-gray-800">
               Latest Balance
             </CardTitle>
-            <DollarSign className="h-8 w-8 text-muted-foreground" />
+            <DollarSign className="h-8 w-8 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-5xl font-bold">
+            <div className="text-5xl font-bold text-gray-800">
               R{latestBalance.toFixed(2)}
             </div>
-            <p className="text-xl text-muted-foreground">Updated just now</p>
+            <p className="text-lg text-gray-500 mt-2">Updated just now</p>
           </CardContent>
         </Card>
-        
-      </section>
-      <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-      <Card>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="bg-white border-2 border-red-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-2xl font-medium">Total Sent</CardTitle>
-            <ArrowUpIcon className="h-8 w-8 text-red-500" />
+            <CardTitle className="text-2xl font-medium text-gray-800">Total Sent</CardTitle>
+            <ArrowUp className="h-8 w-8 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-5xl font-bold">R{totalSent.toFixed(2)}</div>
-            <p className="text-xl text-muted-foreground">Updated just now</p>
+            <div className="text-5xl font-bold text-gray-800">R{totalSent.toFixed(2)}</div>
+            <p className="text-lg text-gray-500 mt-2">Updated just now</p>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className="bg-white border-2 border-green-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-2xl font-medium">
+            <CardTitle className="text-2xl font-medium text-gray-800">
               Total Received
             </CardTitle>
-            <ArrowDownIcon className="h-8 w-8 text-green-500" />
+            <ArrowDown className="h-8 w-8 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-5xl font-bold">
+            <div className="text-5xl font-bold text-gray-800">
               R{totalReceived.toFixed(2)}
             </div>
-            <p className="text-xl text-muted-foreground">Updated just now</p>
+            <p className="text-lg text-gray-500 mt-2">Updated just now</p>
           </CardContent>
         </Card>
-      </section>
-      
+      </div>
     </div>
-  );
+  )
 }
 
 function Transactions({ transactions }: TransactionListProps) {
