@@ -75,7 +75,7 @@ export default function EmployeeDashboard() {
     setLoading(true);
     const token = getToken();
     try {
-      const response = await axios.get(`https://localhost:5000/payments/all`, {
+      const response = await axios.get(`https://apds-7311-backend.vercel.app/payments/all`, {
         headers: {
           Authorization: `Bearer ${token}`,
         }

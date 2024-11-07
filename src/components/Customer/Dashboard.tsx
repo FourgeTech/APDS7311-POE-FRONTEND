@@ -113,7 +113,7 @@ export default function Dashboard() {
     setLoading(true);
     const token = getToken();
     try {
-      const response = await axios.get(`https://localhost:5000/payments/customer/m`, {
+      const response = await axios.get(`https://apds-7311-backend.vercel.app/payments/customer/m`, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
@@ -131,7 +131,7 @@ export default function Dashboard() {
   const loadDatafromAPI = async () => {
     try {
       const token = getToken();
-      const response = await axios.get(`https://localhost:5000/payments/dashboard/m`, {
+      const response = await axios.get(`https://apds-7311-backend.vercel.app/payments/dashboard/m`, {
         headers: {
           Authorization: `Bearer ${token}`,
         }

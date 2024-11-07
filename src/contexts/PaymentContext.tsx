@@ -58,7 +58,7 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
         setLoading(true);
         const token = getToken();
         try {
-            const response = await axios.post(`https://localhost:5000/payments/new`, payment, {
+            const response = await axios.post(`https://apds-7311-backend.vercel.app/payments/new`, payment, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -77,7 +77,7 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
     const getPaymentById = async (id: string): Promise<Payment | null> => {
         setLoading(true);
         try {
-            const response = await fetch(`https://localhost:5000/payments/${id}`);
+            const response = await fetch(`https://apds-7311-backend.vercel.app/payments/${id}`);
             if (response.ok) {
                 const data = await response.json();
                 return data;
@@ -97,7 +97,7 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
     const updatePaymentStatus = async (id: string, status: string) => {
         setLoading(true);
         try {
-            await fetch(`https://localhost:5000/payments/${id}`, {
+            await fetch(`https://apds-7311-backend.vercel.app/payments/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -116,7 +116,7 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
     const deletePayment = async (id: string) => {
         setLoading(true);
         try {
-            await fetch(`https://localhost:5000/payments/${id}`, {
+            await fetch(`https://apds-7311-backend.vercel.app/payments/${id}`, {
                 method: 'DELETE',
             });
             setPayments(payments.filter(payment => payment.customerID !== id));
@@ -131,7 +131,7 @@ export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children })
         setLoading(true);
         const token = getToken();
         try {
-            const response = await axios.post(`https://localhost:5000/payments/deposit`, values, {
+            const response = await axios.post(`https://apds-7311-backend.vercel.app/payments/deposit`, values, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }

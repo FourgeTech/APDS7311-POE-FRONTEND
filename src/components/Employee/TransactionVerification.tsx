@@ -75,14 +75,14 @@ export default function TransactionVerification({ transactions = [], accountNumb
   const handleVerifyField = (field: string) => {
     setVerificationStatus((prev) => ({
       ...prev,
-      [field]: !prev[field],
+      [field as keyof typeof verificationStatus]: !prev[field as keyof typeof verificationStatus],
     }))
   }
 
   const updateTransactionStatus = async (transactionId: string, status: string) => {
     try {
       const token = localStorage.getItem('jwtToken');
-      await axios.put(`https://localhost:5000/payments/${transactionId}`, {
+      await axios.put(`https://apds-7311-backend.vercel.app/payments/${transactionId}`, {
         paymentStatus: status,
         verifiedBy: user?.firstName,
         submittedBy: user?.username

@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (values: RegisterValues) => {
     setLoading(true);
     try {
-      const response = await fetch("https://localhost:5000/auth/register", {
+      const response = await fetch("https://apds-7311-backend.vercel.app/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +105,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const endpoint = loginType === "customer" ? "customer/login" : "employee/login";
-      const response = await axios.post(`https://localhost:5000/auth/${endpoint}`, {
+      const response = await axios.post(`https://apds-7311-backend.vercel.app/auth/${endpoint}`, {
         username,
         accountNumber,
         password,
