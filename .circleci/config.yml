@@ -11,12 +11,12 @@ jobs:
     steps:
       - checkout
       - node/install-packages:
-          pkg-manager: npm  # Changed to npm
+          pkg-manager: npm
       - run:
-          command: npm install jest-junit  # Install jest-junit using npm
+          command: npm install jest-junit
       - run:
           name: Run tests
-          command: npm test -- --ci --runInBand --reporters=default --reporters=jest-junit  # Use npm test
+          command: npm test -- --ci --runInBand --reporters=default --reporters=jest-junit
       - store_test_results:
           path: ./test-results/
 
@@ -46,7 +46,6 @@ jobs:
     steps:
       - checkout
       - run:
-          # Set the SonarQube project key, host URL and token as environment variables in CircleCI
           name: Run SonarQube analysis
           command: |
             sonar-scanner \
@@ -55,8 +54,22 @@ jobs:
               -Dsonar.host.url=$SONAR_HOST_URL \
               -Dsonar.login=$SONAR_TOKEN
 
+  deploy:
+    # Deploy to Firebase Hosting
+    docker:
+      - image: google/cloud-sdk:latest  # Google Cloud SDK image for Firebase CLI
+    steps:
+      - checkout
+      - run:
+          name: Install Firebase CLI
+          command: curl -sL https://firebase.tools | bash 
+      - run:
+          name: Deploy to Firebase
+          command: firebase deploy --only hosting --token $FIREBASE_TOKEN
+      # Note: Set FIREBASE_TOKEN in CircleCI Project Environment Variables for security
+
 workflows:
-  build-test-and-sonar:
+  build-test-and-deploy:
     jobs:
       - test-node
       - build-node:
@@ -74,3 +87,9 @@ workflows:
                 - main
                 - feature/*
                 - release/*
+      - deploy:
+          requires:
+            - build-node
+          filters:
+            branches:
+              only: main
